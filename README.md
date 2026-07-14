@@ -9,7 +9,7 @@ ClearPNG is a Next.js + Tailwind CSS MVP for removing image backgrounds and down
 - Switch result preview backgrounds between checkerboard, white, and black.
 - Download the processed image as `clearpng-result.png`.
 - SEO landing pages for logo, signature, product photo, and white-background use cases.
-- Edge API route that proxies requests to remove.bg without exposing the API key to the frontend.
+- Cloudflare Pages Function that proxies requests to remove.bg without exposing the API key to the frontend.
 
 ## Local Development
 
@@ -30,8 +30,12 @@ REMOVE_BG_API_KEY=your_remove_bg_api_key_here
 
 Without this key, the UI still loads and validates uploads, but background removal requests return a configuration error.
 
+For Cloudflare Pages, set the same variable in the project environment variables.
+
 ## Build
 
 ```bash
 npm run build
 ```
+
+The production build exports the frontend to `out/`. Cloudflare Pages serves that static output and runs the remove.bg proxy from `functions/api/remove-bg.js`.

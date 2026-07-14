@@ -1,9 +1,7 @@
-export const runtime = "edge";
-
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
-function jsonError(message: string, status = 400) {
+function jsonError(message, status = 400) {
   return Response.json(
     { error: message },
     {
@@ -15,8 +13,8 @@ function jsonError(message: string, status = 400) {
   );
 }
 
-export async function POST(request: Request) {
-  const apiKey = process.env.REMOVE_BG_API_KEY;
+export async function onRequestPost(context) {
+  const apiKey = context.env.REMOVE_BG_API_KEY;
 
   if (!apiKey) {
     return jsonError(
@@ -25,10 +23,10 @@ export async function POST(request: Request) {
     );
   }
 
-  let formData: FormData;
+  let formData;
 
   try {
-    formData = await request.formData();
+    formData = await context.request.formData();
   } catch {
     return jsonError("Invalid upload. Please send multipart/form-data.");
   }
@@ -77,4 +75,8 @@ export async function POST(request: Request) {
       "Cache-Control": "no-store",
     },
   });
+}
+
+export function onRequest() {
+  return jsonError("Method not allowed.", 405);
 }

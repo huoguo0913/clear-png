@@ -1,6 +1,8 @@
 import { pageOrder, pages, siteUrl } from "@/lib/pages";
 import type { MetadataRoute } from "next";
 
+export const dynamic = "force-static";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   return pageOrder.map((slug) => ({
     url: `${siteUrl}${pages[slug].path === "/" ? "" : pages[slug].path}`,
