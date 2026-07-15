@@ -10,6 +10,7 @@ ClearPNG is a Next.js + Tailwind CSS MVP for removing image backgrounds and down
 - Download the processed image as `clearpng-result.png`.
 - SEO landing pages for logo, signature, product photo, and white-background use cases.
 - Cloudflare Pages Function that proxies requests to remove.bg without exposing the API key to the frontend.
+- Google sign-in backed by Cloudflare D1 user and session tables.
 
 ## Local Development
 
@@ -26,11 +27,14 @@ Create `.env.local` and set:
 
 ```bash
 REMOVE_BG_API_KEY=your_remove_bg_api_key_here
+GOOGLE_CLIENT_ID=your_google_oauth_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret_here
+APP_ORIGIN=http://localhost:3000
 ```
 
 Without this key, the UI still loads and validates uploads, but background removal requests return a configuration error.
 
-For Cloudflare Pages, set the same variable in the project environment variables.
+For Cloudflare Pages, set the same variables in the project environment variables. Bind a D1 database as `CLEARPNG_DB` and run the SQL in `migrations/0001_auth.sql`.
 
 ## Build
 

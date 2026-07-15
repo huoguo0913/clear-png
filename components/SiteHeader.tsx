@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthStatus } from "@/components/AuthStatus";
 
 const navItems = [
   { href: "/remove-white-background-from-logo", label: "Logo" },
@@ -28,12 +29,15 @@ export function SiteHeader() {
             </Link>
           ))}
         </div>
-        <Link
-          href="/#tool"
-          className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
-        >
-          Upload
-        </Link>
+        <div className="flex items-center gap-2">
+          <AuthStatus />
+          <Link
+            href="/#tool"
+            className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+          >
+            Upload
+          </Link>
+        </div>
       </nav>
     </header>
   );
