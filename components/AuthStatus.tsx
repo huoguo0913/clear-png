@@ -13,7 +13,10 @@ type AuthResponse = {
 };
 
 export function AuthStatus() {
-  const [auth, setAuth] = useState<AuthResponse | null>(null);
+  const [auth, setAuth] = useState<AuthResponse>({
+    authenticated: false,
+    user: null,
+  });
 
   useEffect(() => {
     let alive = true;
@@ -37,10 +40,6 @@ export function AuthStatus() {
       credentials: "include",
     });
     setAuth({ authenticated: false, user: null });
-  }
-
-  if (!auth) {
-    return <div className="h-9 w-24 rounded-lg bg-slate-100" aria-hidden />;
   }
 
   if (!auth.authenticated || !auth.user) {
