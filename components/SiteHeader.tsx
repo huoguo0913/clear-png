@@ -6,6 +6,7 @@ const navItems = [
   { href: "/signature-background-remover", label: "Signature" },
   { href: "/product-photo-background-remover", label: "Product Photo" },
   { href: "/remove-white-background", label: "White Background" },
+  { href: "/pricing", label: "Pricing" },
 ];
 
 export function SiteHeader() {
