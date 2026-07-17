@@ -1,3 +1,6 @@
+import { getCurrentUser } from "../_shared/auth.js";
+import { consumeCredit, getCreditSummary } from "../_shared/credits.js";
+
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
@@ -14,7 +17,9 @@ function jsonError(message, status = 400) {
 }
 
 export async function onRequestPost(context) {
-  const apiKey = context.env.REMOVE_BG_API_KEY;
+  const { request, env } = context;
+  const apiKey = env.REMOVE_BG_API_KEY;
+  const db = env.CLEARPNG_DB;
 
   if (!apiKey) {
     return jsonError(
@@ -23,10 +28,29 @@ export async function onRequestPost(context) {
     );
   }
 
+  if (!db) {
+    return jsonError("Credits are not configured yet. Please try again later.", 503);
+  }
+
+  const user = await getCurrentUser(request, db);
+
+  if (!user) {
+    return jsonError("Please sign in to use your monthly image credits.", 401);
+  }
+
+  const credits = await getCreditSummary(db, user.id);
+
+  if (credits.remaining < 1) {
+    return jsonError(
+      "You have used all monthly image credits. Please upgrade on the pricing page.",
+      402,
+    );
+  }
+
   let formData;
 
   try {
-    formData = await context.request.formData();
+    formData = await request.formData();
   } catch {
     return jsonError("Invalid upload. Please send multipart/form-data.");
   }
@@ -65,6 +89,15 @@ export async function onRequestPost(context) {
     return jsonError(
       "Background removal failed. Please try another image or retry.",
       502,
+    );
+  }
+
+  const credit = await consumeCredit(db, user.id, request);
+
+  if (!credit.ok) {
+    return jsonError(
+      "You have used all monthly image credits. Please upgrade on the pricing page.",
+      402,
     );
   }
 

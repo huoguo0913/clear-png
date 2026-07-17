@@ -29,12 +29,17 @@ Create `.env.local` and set:
 REMOVE_BG_API_KEY=your_remove_bg_api_key_here
 GOOGLE_CLIENT_ID=your_google_oauth_client_id_here
 GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret_here
+PAYPAL_CLIENT_ID=your_paypal_client_id_here
+PAYPAL_CLIENT_SECRET=your_paypal_client_secret_here
+PAYPAL_ENV=sandbox
 APP_ORIGIN=http://localhost:3000
 ```
 
 Without this key, the UI still loads and validates uploads, but background removal requests return a configuration error.
 
 For Cloudflare Pages, set the same variables in the project environment variables. Bind a D1 database as `CLEARPNG_DB` and run the SQL in `migrations/0001_auth.sql`.
+
+PayPal checkout uses one-time sandbox orders for monthly image credits. Run the SQL in `migrations/0002_paypal_credits.sql` before enabling checkout.
 
 ## Build
 

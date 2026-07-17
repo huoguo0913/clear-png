@@ -79,6 +79,29 @@ export async function hashToken(token) {
   return base64Url(new Uint8Array(digest));
 }
 
+export async function getCurrentUser(request, db) {
+  if (!db) return null;
+
+  const sessionToken = parseCookies(request)[SESSION_COOKIE];
+  if (!sessionToken) return null;
+
+  const sessionHash = await hashToken(sessionToken);
+  const now = new Date().toISOString();
+
+  return db
+    .prepare(
+      `SELECT users.id, users.email, users.name, users.picture_url
+       FROM sessions
+       JOIN users ON users.id = sessions.user_id
+       WHERE sessions.session_hash = ?
+         AND sessions.revoked_at IS NULL
+         AND sessions.expires_at > ?
+       LIMIT 1`,
+    )
+    .bind(sessionHash, now)
+    .first();
+}
+
 function base64Url(bytes) {
   let binary = "";
   for (const byte of bytes) binary += String.fromCharCode(byte);

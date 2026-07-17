@@ -10,6 +10,9 @@ type AuthResponse = {
     name: string | null;
     pictureUrl: string | null;
   };
+  credits?: {
+    remaining: number;
+  };
 };
 
 export function AuthStatus() {
@@ -76,6 +79,11 @@ export function AuthStatus() {
       <span className="hidden max-w-32 truncate text-sm font-medium text-slate-700 sm:inline">
         {auth.user.name || auth.user.email}
       </span>
+      {auth.credits ? (
+        <span className="hidden rounded-full bg-mint/10 px-2.5 py-1 text-xs font-bold text-mint lg:inline">
+          {auth.credits.remaining} credits
+        </span>
+      ) : null}
       <button
         type="button"
         className="icon-button"

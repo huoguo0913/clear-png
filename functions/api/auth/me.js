@@ -1,4 +1,5 @@
-import { SESSION_COOKIE, hashToken, json, parseCookies } from "../../_shared/auth.js";
+import { getCurrentUser, json } from "../../_shared/auth.js";
+import { getCreditSummary } from "../../_shared/credits.js";
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -8,38 +9,23 @@ export async function onRequestGet(context) {
     return json({ authenticated: false, user: null });
   }
 
-  const sessionToken = parseCookies(request)[SESSION_COOKIE];
-  if (!sessionToken) {
+  const user = await getCurrentUser(request, db);
+
+  if (!user) {
     return json({ authenticated: false, user: null });
   }
 
-  const sessionHash = await hashToken(sessionToken);
-  const now = new Date().toISOString();
-  const row = await db
-    .prepare(
-      `SELECT users.id, users.email, users.name, users.picture_url
-       FROM sessions
-       JOIN users ON users.id = sessions.user_id
-       WHERE sessions.session_hash = ?
-         AND sessions.revoked_at IS NULL
-         AND sessions.expires_at > ?
-       LIMIT 1`,
-    )
-    .bind(sessionHash, now)
-    .first();
-
-  if (!row) {
-    return json({ authenticated: false, user: null });
-  }
+  const credits = await getCreditSummary(db, user.id);
 
   return json({
     authenticated: true,
     user: {
-      id: row.id,
-      email: row.email,
-      name: row.name,
-      pictureUrl: row.picture_url,
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      pictureUrl: user.picture_url,
     },
+    credits,
   });
 }
 

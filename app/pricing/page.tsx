@@ -2,10 +2,27 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { ArrowRight, Check, CreditCard, ShieldCheck, Sparkles } from "lucide-react";
+import { CheckoutNotice } from "@/components/CheckoutNotice";
+import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
 import { SiteHeader } from "@/components/SiteHeader";
 import { siteUrl } from "@/lib/pages";
 
 const pricingUrl = `${siteUrl}/pricing`;
+
+type PaidPlanId = "starter" | "pro";
+
+type PricingPlan = {
+  name: string;
+  price: string;
+  cadence: string;
+  credits: string;
+  description: string;
+  cta: string;
+  href: string | null;
+  planId: PaidPlanId | null;
+  featured: boolean;
+  features: string[];
+};
 
 export const metadata: Metadata = {
   title: "ClearPNG Pricing - Simple Background Removal Plans",
@@ -30,7 +47,7 @@ export const metadata: Metadata = {
   },
 };
 
-const plans = [
+const plans: PricingPlan[] = [
   {
     name: "Free",
     price: "$0",
@@ -39,6 +56,7 @@ const plans = [
     description: "Try ClearPNG with a few real files before choosing a plan.",
     cta: "Start free",
     href: "/#tool",
+    planId: null,
     featured: false,
     features: [
       "Remove backgrounds from JPG, PNG, and WebP",
@@ -54,7 +72,8 @@ const plans = [
     credits: "20 images / month",
     description: "A light monthly plan for occasional logos, signatures, and assets.",
     cta: "Choose Starter",
-    href: "/#tool",
+    href: null,
+    planId: "starter",
     featured: false,
     features: [
       "20 background removals each month",
@@ -70,7 +89,8 @@ const plans = [
     credits: "100 images / month",
     description: "For creators, small stores, and teams that process images every week.",
     cta: "Choose Pro",
-    href: "/#tool",
+    href: null,
+    planId: "pro",
     featured: true,
     features: [
       "100 background removals each month",
@@ -138,6 +158,7 @@ export default function PricingPage() {
                 text="ClearPNG does not store your uploaded or processed images."
               />
             </div>
+            <CheckoutNotice />
           </div>
         </section>
 
@@ -190,17 +211,22 @@ export default function PricingPage() {
                     ))}
                   </ul>
 
-                  <Link
-                    href={plan.href}
-                    className={`mt-auto inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold transition ${
-                      plan.featured
-                        ? "bg-ink text-white shadow-sm hover:bg-slate-800"
-                        : "border border-slate-300 bg-white text-ink hover:bg-slate-50"
-                    }`}
-                  >
-                    {plan.cta}
-                    <ArrowRight className="h-4 w-4" aria-hidden />
-                  </Link>
+                  {plan.planId ? (
+                    <PricingCheckoutButton
+                      plan={plan.planId}
+                      featured={plan.featured}
+                    >
+                      {plan.cta}
+                    </PricingCheckoutButton>
+                  ) : (
+                    <Link
+                      href={plan.href || "/#tool"}
+                      className="mt-auto inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-slate-50"
+                    >
+                      {plan.cta}
+                      <ArrowRight className="h-4 w-4" aria-hidden />
+                    </Link>
+                  )}
                 </article>
               ))}
             </div>
