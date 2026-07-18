@@ -70,7 +70,9 @@ async function handleApprovedOrder(db, env, orderId) {
     await markOrderFromCapture(db, order, captured);
   } catch {
     await db
-      .prepare("UPDATE paypal_orders SET status = ? WHERE order_id = ?")
+      .prepare(
+        "UPDATE paypal_orders SET status = ? WHERE order_id = ? AND status != 'COMPLETED'",
+      )
       .bind("APPROVED", orderId)
       .run();
   }
@@ -87,7 +89,9 @@ async function handleCaptureEvent(db, event) {
 
   if (status !== "COMPLETED") {
     await db
-      .prepare("UPDATE paypal_orders SET status = ? WHERE order_id = ?")
+      .prepare(
+        "UPDATE paypal_orders SET status = ? WHERE order_id = ? AND status != 'COMPLETED'",
+      )
       .bind(status, orderId)
       .run();
     return;
