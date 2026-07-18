@@ -1,4 +1,4 @@
-import { getPaidPlan } from "../../_shared/credits.js";
+import { getPaidPlan, grantPaidCredits } from "../../_shared/credits.js";
 import { capturePayPalOrder, paypalConfigured } from "../../_shared/paypal.js";
 
 export async function onRequestGet(context) {
@@ -35,8 +35,6 @@ export async function onRequestGet(context) {
     const captured = await capturePayPalOrder(env, orderId);
     const now = new Date();
     const nowIso = now.toISOString();
-    const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
-      .toISOString();
     const payerEmail = captured.payer?.email_address || null;
 
     if (captured.status !== "COMPLETED") {
@@ -56,25 +54,7 @@ export async function onRequestGet(context) {
       .bind("COMPLETED", nowIso, payerEmail, orderId)
       .run();
 
-    await db
-      .prepare(
-        `INSERT INTO credit_grants (
-          id, user_id, source, source_id, plan, credits_total, credits_used,
-          starts_at, expires_at, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`,
-      )
-      .bind(
-        crypto.randomUUID(),
-        existing.user_id,
-        "paypal",
-        orderId,
-        existing.plan,
-        plan.credits,
-        nowIso,
-        expiresAt,
-        nowIso,
-      )
-      .run();
+    await grantPaidCredits(db, existing, plan, now);
 
     return redirect(`${origin}/pricing?checkout=success`);
   } catch {

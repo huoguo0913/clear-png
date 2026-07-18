@@ -67,3 +67,37 @@ export async function capturePayPalOrder(env, orderId) {
 
   return response.json();
 }
+
+export async function verifyPayPalWebhook(env, request, webhookEvent) {
+  if (!env.PAYPAL_WEBHOOK_ID) {
+    throw new Error("PayPal webhook ID is not configured.");
+  }
+
+  const accessToken = await getPayPalAccessToken(env);
+  const response = await fetch(
+    `${paypalBaseUrl(env)}/v1/notifications/verify-webhook-signature`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        auth_algo: request.headers.get("PAYPAL-AUTH-ALGO"),
+        cert_url: request.headers.get("PAYPAL-CERT-URL"),
+        transmission_id: request.headers.get("PAYPAL-TRANSMISSION-ID"),
+        transmission_sig: request.headers.get("PAYPAL-TRANSMISSION-SIG"),
+        transmission_time: request.headers.get("PAYPAL-TRANSMISSION-TIME"),
+        webhook_id: env.PAYPAL_WEBHOOK_ID,
+        webhook_event: webhookEvent,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("PayPal webhook verification failed.");
+  }
+
+  const data = await response.json();
+  return data.verification_status === "SUCCESS";
+}

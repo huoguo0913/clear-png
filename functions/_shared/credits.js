@@ -132,3 +132,33 @@ export async function consumeCredit(db, userId, request, now = new Date()) {
 
   return { ok: true, grant };
 }
+
+export async function grantPaidCredits(db, order, plan, now = new Date()) {
+  const nowIso = now.toISOString();
+  const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+    .toISOString();
+  const result = await db
+    .prepare(
+      `INSERT OR IGNORE INTO credit_grants (
+        id, user_id, source, source_id, plan, credits_total, credits_used,
+        starts_at, expires_at, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`,
+    )
+    .bind(
+      crypto.randomUUID(),
+      order.user_id,
+      "paypal",
+      order.order_id,
+      order.plan,
+      plan.credits,
+      nowIso,
+      expiresAt,
+      nowIso,
+    )
+    .run();
+
+  return {
+    granted: result.meta?.changes ? result.meta.changes > 0 : false,
+    expiresAt,
+  };
+}
