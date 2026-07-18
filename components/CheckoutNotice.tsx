@@ -37,7 +37,9 @@ export function CheckoutNotice() {
   const message = messages[state];
 
   return (
-    <div className={`mt-8 rounded-lg border p-4 ${message.className}`}>
+    <div
+      className={`mx-auto mt-6 max-w-7xl rounded-lg border p-4 ${message.className}`}
+    >
       <p className="font-semibold">{message.title}</p>
       <p className="mt-1 text-sm leading-6">{message.text}</p>
     </div>

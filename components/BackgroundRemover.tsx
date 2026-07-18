@@ -10,6 +10,7 @@ import {
   UploadCloud,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { CheckoutNotice } from "@/components/CheckoutNotice";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -171,6 +172,7 @@ export function BackgroundRemover({ mode, previewHint }: Props) {
 
   return (
     <section id="tool" className="tool-shell">
+      <CheckoutNotice />
       <div className="tool-panel">
         <div className="flex flex-col gap-3 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div>

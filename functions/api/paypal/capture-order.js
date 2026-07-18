@@ -22,7 +22,7 @@ export async function onRequestGet(context) {
   }
 
   if (existing.status === "COMPLETED") {
-    return redirect(`${origin}/pricing?checkout=success`);
+    return redirect(`${origin}/?checkout=success#tool`);
   }
 
   const plan = getPaidPlan(existing.plan);
@@ -56,7 +56,7 @@ export async function onRequestGet(context) {
 
     await grantPaidCredits(db, existing, plan, now);
 
-    return redirect(`${origin}/pricing?checkout=success`);
+    return redirect(`${origin}/?checkout=success#tool`);
   } catch {
     return redirect(`${origin}/pricing?checkout=failed`);
   }
