@@ -33,6 +33,11 @@ PAYPAL_CLIENT_ID=your_paypal_client_id_here
 PAYPAL_CLIENT_SECRET=your_paypal_client_secret_here
 PAYPAL_ENV=sandbox
 PAYPAL_WEBHOOK_ID=your_paypal_webhook_id_here
+CREEM_API_KEY=your_creem_api_key_here
+CREEM_ENV=test
+CREEM_STARTER_PRODUCT_ID=your_creem_starter_product_id_here
+CREEM_PRO_PRODUCT_ID=your_creem_pro_product_id_here
+CREEM_WEBHOOK_SECRET=your_creem_webhook_secret_here
 APP_ORIGIN=http://localhost:3000
 ```
 
@@ -41,6 +46,8 @@ Without this key, the UI still loads and validates uploads, but background remov
 For Cloudflare Pages, set the same variables in the project environment variables. Bind a D1 database as `CLEARPNG_DB` and run the SQL in `migrations/0001_auth.sql`.
 
 PayPal checkout uses one-time sandbox orders for monthly image credits. Run the SQL in `migrations/0002_paypal_credits.sql` and `migrations/0003_paypal_webhooks.sql` before enabling checkout.
+
+Creem checkout uses one-time test or live orders for the same credit system. Run `migrations/0004_creem_checkout.sql`, configure the product IDs, and add the webhook endpoint `/api/creem/webhook` in the Creem dashboard.
 
 ## Build
 

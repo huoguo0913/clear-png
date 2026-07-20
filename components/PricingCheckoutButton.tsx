@@ -6,10 +6,16 @@ import { useState } from "react";
 type Props = {
   plan: "starter" | "pro";
   children: string;
+  provider?: "paypal" | "creem";
   featured?: boolean;
 };
 
-export function PricingCheckoutButton({ plan, children, featured = false }: Props) {
+export function PricingCheckoutButton({
+  plan,
+  children,
+  provider = "paypal",
+  featured = false,
+}: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,14 +24,19 @@ export function PricingCheckoutButton({ plan, children, featured = false }: Prop
     setError(null);
 
     try {
-      const response = await fetch("/api/paypal/create-order", {
+      const response = await fetch(
+        provider === "creem"
+          ? "/api/creem/create-checkout"
+          : "/api/paypal/create-order",
+        {
         method: "POST",
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ plan }),
-      });
+        },
+      );
 
       if (response.status === 401) {
         window.location.href = `/api/auth/google/start?return_to=${encodeURIComponent(
@@ -36,14 +47,17 @@ export function PricingCheckoutButton({ plan, children, featured = false }: Prop
 
       const data = (await response.json()) as {
         approvalUrl?: string;
+        checkoutUrl?: string;
         error?: string;
       };
+      const redirectUrl =
+        provider === "creem" ? data.checkoutUrl : data.approvalUrl;
 
-      if (!response.ok || !data.approvalUrl) {
+      if (!response.ok || !redirectUrl) {
         throw new Error(data.error || "Checkout failed. Please try again.");
       }
 
-      window.location.href = data.approvalUrl;
+      window.location.href = redirectUrl;
     } catch (caught) {
       setError(
         caught instanceof Error
@@ -72,7 +86,7 @@ export function PricingCheckoutButton({ plan, children, featured = false }: Prop
         ) : (
           <ArrowRight className="h-4 w-4" aria-hidden />
         )}
-        {isLoading ? "Opening PayPal..." : children}
+        {isLoading ? "Opening checkout..." : children}
       </button>
       {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
     </div>

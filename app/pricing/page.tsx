@@ -212,12 +212,20 @@ export default function PricingPage() {
                   </ul>
 
                   {plan.planId ? (
-                    <PricingCheckoutButton
-                      plan={plan.planId}
-                      featured={plan.featured}
-                    >
-                      {plan.cta}
-                    </PricingCheckoutButton>
+                    <div className="mt-auto grid gap-2">
+                      <PricingCheckoutButton
+                        plan={plan.planId}
+                        featured={plan.featured}
+                      >
+                        Pay with PayPal
+                      </PricingCheckoutButton>
+                      <PricingCheckoutButton
+                        plan={plan.planId}
+                        provider="creem"
+                      >
+                        Pay with Creem
+                      </PricingCheckoutButton>
+                    </div>
                   ) : (
                     <Link
                       href={plan.href || "/#tool"}

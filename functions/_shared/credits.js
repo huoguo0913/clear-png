@@ -137,6 +137,7 @@ export async function grantPaidCredits(db, order, plan, now = new Date()) {
   const nowIso = now.toISOString();
   const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
     .toISOString();
+  const source = order.source || "paypal";
   const result = await db
     .prepare(
       `INSERT OR IGNORE INTO credit_grants (
@@ -147,7 +148,7 @@ export async function grantPaidCredits(db, order, plan, now = new Date()) {
     .bind(
       crypto.randomUUID(),
       order.user_id,
-      "paypal",
+      source,
       order.order_id,
       order.plan,
       plan.credits,
