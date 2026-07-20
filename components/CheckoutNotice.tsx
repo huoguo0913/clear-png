@@ -15,7 +15,7 @@ const messages = {
   },
   failed: {
     title: "Checkout failed",
-    text: "PayPal could not complete this payment. Please try again.",
+    text: "The payment could not be completed. Please try again.",
     className: "border-coral/30 bg-coral/10 text-red-900",
   },
 };

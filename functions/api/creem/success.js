@@ -11,19 +11,22 @@ export async function onRequestGet(context) {
     return redirect(`${origin}/pricing?checkout=failed`);
   }
 
+  const checkoutId = requestUrl.searchParams.get("checkout_id");
+  const requestId = requestUrl.searchParams.get("request_id");
   const verified = await verifyCreemRedirect(env, requestUrl.searchParams);
+  const existing = await findCreemOrder(db, checkoutId, requestId);
 
   if (!verified) {
+    if (existing && (await hasCompletedCreemPayment(db, existing))) {
+      return redirect(`${origin}/?checkout=success#tool`);
+    }
+
     return redirect(`${origin}/pricing?checkout=failed`);
   }
 
-  const checkoutId = requestUrl.searchParams.get("checkout_id");
-  const requestId = requestUrl.searchParams.get("request_id");
   const orderId = requestUrl.searchParams.get("order_id");
   const customerId = requestUrl.searchParams.get("customer_id");
   const productId = requestUrl.searchParams.get("product_id");
-
-  const existing = await findCreemOrder(db, checkoutId, requestId);
 
   if (!existing) {
     return redirect(`${origin}/pricing?checkout=failed`);
@@ -100,6 +103,22 @@ async function markCreemOrderCompleted(db, order, data) {
       order.checkout_id,
     )
     .run();
+}
+
+async function hasCompletedCreemPayment(db, order) {
+  if (order.status === "completed") return true;
+
+  const grant = await db
+    .prepare(
+      `SELECT id
+       FROM credit_grants
+       WHERE source = ? AND source_id = ?
+       LIMIT 1`,
+    )
+    .bind("creem", order.checkout_id)
+    .first();
+
+  return Boolean(grant);
 }
 
 function redirect(location) {
