@@ -32,21 +32,34 @@ export async function onRequestPost(context) {
   const requestUrl = new URL(request.url);
   const origin = env.APP_ORIGIN || requestUrl.origin;
   const requestId = `creem:${crypto.randomUUID()}`;
-  const checkout = await createCreemCheckout(env, {
-    product_id: productId,
-    request_id: requestId,
-    units: 1,
-    success_url: `${origin}/api/creem/success`,
-    customer: {
-      id: user.id,
-      email: user.email,
-    },
-    metadata: {
-      userId: user.id,
-      plan: planId,
-      provider: "creem",
-    },
-  });
+  let checkout;
+
+  try {
+    checkout = await createCreemCheckout(env, {
+      product_id: productId,
+      request_id: requestId,
+      units: 1,
+      success_url: `${origin}/api/creem/success`,
+      customer: {
+        email: user.email,
+      },
+      metadata: {
+        userId: user.id,
+        plan: planId,
+        provider: "creem",
+      },
+    });
+  } catch (error) {
+    return json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Creem checkout creation failed.",
+      },
+      502,
+    );
+  }
 
   if (!checkout.id || !checkout.checkout_url) {
     return json({ error: "Creem did not return a checkout URL." }, 502);

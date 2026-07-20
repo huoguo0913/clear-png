@@ -45,11 +45,14 @@ export function PricingCheckoutButton({
         return;
       }
 
-      const data = (await response.json()) as {
+      const contentType = response.headers.get("content-type") || "";
+      const data = contentType.includes("application/json")
+        ? ((await response.json()) as {
         approvalUrl?: string;
         checkoutUrl?: string;
         error?: string;
-      };
+          })
+        : { error: await response.text() };
       const redirectUrl =
         provider === "creem" ? data.checkoutUrl : data.approvalUrl;
 

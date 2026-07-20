@@ -30,7 +30,8 @@ export async function createCreemCheckout(env, checkout) {
   });
 
   if (!response.ok) {
-    throw new Error("Creem checkout creation failed.");
+    const message = await response.text().catch(() => "");
+    throw new Error(message || "Creem checkout creation failed.");
   }
 
   return response.json();
