@@ -13,18 +13,20 @@ export type PageConfig = {
   mode: "General Image" | "Logo" | "Signature" | "Product Photo";
   title: string;
   description: string;
+  keywords: string[];
   h1: string;
   kicker: string;
   intro: string;
   bullets: string[];
   useCases: string[];
+  steps: string[];
   faqs: Array<{ question: string; answer: string }>;
   previewHint: string;
 };
 
 export const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-  "https://clearpng.app";
+  "https://clearpng.shop";
 
 export const pages: Record<PageSlug, PageConfig> = {
   home: {
@@ -34,6 +36,12 @@ export const pages: Record<PageSlug, PageConfig> = {
     title: "Free Image Background Remover & Transparent PNG Maker | ClearPNG",
     description:
       "Remove backgrounds from JPG, PNG, and WebP images online. Preview the transparent result and download a clean PNG in seconds.",
+    keywords: [
+      "image background remover",
+      "transparent PNG maker",
+      "remove background online",
+      "free background remover",
+    ],
     h1: "Free Image Background Remover",
     kicker: "Transparent PNG maker",
     intro:
@@ -47,6 +55,11 @@ export const pages: Record<PageSlug, PageConfig> = {
       "Make logos transparent for websites and slides.",
       "Turn photographed signatures into reusable PNG files.",
       "Create clean product cutouts for online stores.",
+    ],
+    steps: [
+      "Upload a JPG, PNG, or WebP image.",
+      "Remove the background and preview the transparent PNG.",
+      "Download the finished file for websites, documents, or stores.",
     ],
     faqs: [
       {
@@ -78,6 +91,12 @@ export const pages: Record<PageSlug, PageConfig> = {
     title: "Remove White Background from Logo Online | ClearPNG",
     description:
       "Make your logo background transparent online. Upload a logo, preview it on white, black, or checkerboard backgrounds, and download a clean PNG.",
+    keywords: [
+      "remove white background from logo",
+      "make logo transparent",
+      "transparent logo maker",
+      "logo background remover",
+    ],
     h1: "Remove White Background from Logo",
     kicker: "Logo transparency tool",
     intro:
@@ -91,6 +110,11 @@ export const pages: Record<PageSlug, PageConfig> = {
       "Website headers and navigation logos.",
       "Pitch decks, invoices, and presentation slides.",
       "Marketplace, social profile, and store branding.",
+    ],
+    steps: [
+      "Upload a logo with a white or solid background.",
+      "Preview the logo on light, dark, and transparent backgrounds.",
+      "Download a transparent PNG for your site, store, or deck.",
     ],
     faqs: [
       {
@@ -119,6 +143,12 @@ export const pages: Record<PageSlug, PageConfig> = {
       "Signature Background Remover - Make Signature Transparent | ClearPNG",
     description:
       "Turn a scanned or photographed signature into a transparent PNG for Word, PDF, invoices, forms, and contracts.",
+    keywords: [
+      "signature background remover",
+      "make signature transparent",
+      "transparent signature maker",
+      "remove background from signature",
+    ],
     h1: "Signature Background Remover",
     kicker: "Transparent signature maker",
     intro:
@@ -132,6 +162,11 @@ export const pages: Record<PageSlug, PageConfig> = {
       "Add a transparent signature to PDF forms.",
       "Place signatures inside Word documents and invoices.",
       "Prepare reusable signature assets for office workflows.",
+    ],
+    steps: [
+      "Upload a scan or photo of your signature.",
+      "Remove the paper background and check the edges.",
+      "Download a transparent signature PNG for documents.",
     ],
     faqs: [
       {
@@ -159,6 +194,12 @@ export const pages: Record<PageSlug, PageConfig> = {
     title: "Product Photo Background Remover Online | ClearPNG",
     description:
       "Remove product photo backgrounds online and download clean transparent PNG cutouts for Shopify, Amazon, Etsy, and social media.",
+    keywords: [
+      "product photo background remover",
+      "ecommerce background remover",
+      "product image cutout",
+      "transparent product photo",
+    ],
     h1: "Product Photo Background Remover",
     kicker: "Ecommerce image cutouts",
     intro:
@@ -172,6 +213,11 @@ export const pages: Record<PageSlug, PageConfig> = {
       "Prepare main product images for ecommerce listings.",
       "Create product assets for ads and social posts.",
       "Cut out objects for marketplaces and storefronts.",
+    ],
+    steps: [
+      "Upload a product photo with the item clearly visible.",
+      "Remove the background and inspect the transparent cutout.",
+      "Download a PNG for store pages, ads, and social posts.",
     ],
     faqs: [
       {
@@ -199,6 +245,12 @@ export const pages: Record<PageSlug, PageConfig> = {
     title: "Remove White Background from Image Online | ClearPNG",
     description:
       "Remove white or light backgrounds from images online. Upload JPG, PNG, or WebP and download a transparent PNG.",
+    keywords: [
+      "remove white background",
+      "white background remover",
+      "white to transparent PNG",
+      "remove white background from image",
+    ],
     h1: "Remove White Background from Image",
     kicker: "White background to transparent PNG",
     intro:
@@ -212,6 +264,11 @@ export const pages: Record<PageSlug, PageConfig> = {
       "Remove a white box around a logo.",
       "Clean up simple product and object images.",
       "Prepare transparent graphics for documents and websites.",
+    ],
+    steps: [
+      "Upload an image with a white, light, or simple background.",
+      "Remove the background and compare the result on multiple previews.",
+      "Download the transparent PNG for reuse.",
     ],
     faqs: [
       {
@@ -247,8 +304,21 @@ export function metadataForPage(page: PageConfig): Metadata {
   return {
     title: page.title,
     description: page.description,
+    keywords: page.keywords,
+    metadataBase: new URL(siteUrl),
     alternates: {
       canonical: url,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
     },
     openGraph: {
       title: page.title,
@@ -263,6 +333,67 @@ export function metadataForPage(page: PageConfig): Metadata {
       description: page.description,
     },
   };
+}
+
+export function breadcrumbJsonLd(page: PageConfig) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "ClearPNG",
+        item: siteUrl,
+      },
+      ...(page.path === "/"
+        ? []
+        : [
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: page.h1,
+              item: `${siteUrl}${page.path}`,
+            },
+          ]),
+    ],
+  };
+}
+
+export function softwareApplicationJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "ClearPNG",
+    applicationCategory: "MultimediaApplication",
+    operatingSystem: "Web",
+    url: siteUrl,
+    description:
+      "ClearPNG removes image backgrounds and exports transparent PNG files for logos, signatures, product photos, and white-background images.",
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "USD",
+      lowPrice: "0",
+      highPrice: "19.99",
+    },
+  };
+}
+
+export function siteJsonLd() {
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "ClearPNG",
+      url: siteUrl,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "ClearPNG",
+      url: siteUrl,
+    },
+  ];
 }
 
 export function faqJsonLd(page: PageConfig) {

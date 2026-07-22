@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { ArrowRight, Check, CreditCard, ShieldCheck, Sparkles } from "lucide-react";
 import { CheckoutNotice } from "@/components/CheckoutNotice";
 import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
+import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { siteUrl } from "@/lib/pages";
 
@@ -28,8 +29,19 @@ export const metadata: Metadata = {
   title: "ClearPNG Pricing - Simple Background Removal Plans",
   description:
     "Choose a ClearPNG plan for transparent PNG background removal. Start free, upgrade for monthly credits, and process logos, signatures, and product photos.",
+  keywords: [
+    "ClearPNG pricing",
+    "background remover pricing",
+    "transparent PNG credits",
+    "image background remover plans",
+  ],
+  metadataBase: new URL(siteUrl),
   alternates: {
     canonical: pricingUrl,
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
   openGraph: {
     title: "ClearPNG Pricing - Simple Background Removal Plans",
@@ -125,6 +137,28 @@ const faqs = [
 ];
 
 export default function PricingPage() {
+  const pricingJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: "ClearPNG image background remover",
+    description:
+      "Monthly image credits for removing backgrounds and downloading transparent PNG files.",
+    brand: {
+      "@type": "Brand",
+      name: "ClearPNG",
+    },
+    offers: plans
+      .filter((plan) => plan.planId)
+      .map((plan) => ({
+        "@type": "Offer",
+        name: plan.name,
+        price: plan.price.replace("$", ""),
+        priceCurrency: "USD",
+        availability: "https://schema.org/InStock",
+        url: pricingUrl,
+      })),
+  };
+
   return (
     <>
       <SiteHeader />
@@ -268,6 +302,11 @@ export default function PricingPage() {
           </div>
         </section>
       </main>
+      <SiteFooter />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd) }}
+      />
     </>
   );
 }

@@ -1,8 +1,16 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { BackgroundRemover } from "@/components/BackgroundRemover";
+import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { faqJsonLd, pageOrder, pages, type PageConfig } from "@/lib/pages";
+import {
+  breadcrumbJsonLd,
+  faqJsonLd,
+  pageOrder,
+  pages,
+  softwareApplicationJsonLd,
+  type PageConfig,
+} from "@/lib/pages";
 import { ArrowRight, LockKeyhole, MousePointerClick, Sparkles } from "lucide-react";
 
 export function LandingPage({ page }: { page: PageConfig }) {
@@ -103,6 +111,36 @@ export function LandingPage({ page }: { page: PageConfig }) {
           </div>
         </section>
 
+        <section className="border-y border-slate-200 bg-white">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[0.72fr_1.28fr] lg:px-8">
+            <div>
+              <p className="eyebrow">Workflow</p>
+              <h2 className="mt-3 text-3xl font-bold text-ink">
+                {page.h1} in three steps
+              </h2>
+              <p className="mt-4 text-base leading-7 text-slate-600">
+                Each page is focused on one clear search intent, so you can
+                start with the right background removal workflow.
+              </p>
+            </div>
+            <ol className="grid gap-4 md:grid-cols-3">
+              {page.steps.map((step, index) => (
+                <li
+                  key={step}
+                  className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+                >
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-ink text-sm font-bold text-white">
+                    {index + 1}
+                  </span>
+                  <p className="mt-4 text-sm font-semibold leading-6 text-ink">
+                    {step}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
         <section id="faq" className="bg-slate-50">
           <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
             <p className="eyebrow text-center">FAQ</p>
@@ -124,10 +162,23 @@ export function LandingPage({ page }: { page: PageConfig }) {
           </div>
         </section>
       </main>
+      <SiteFooter />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(page)) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(page)) }}
+      />
+      {page.slug === "home" ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(softwareApplicationJsonLd()),
+          }}
+        />
+      ) : null}
     </>
   );
 }
