@@ -6,7 +6,7 @@ import { CheckoutNotice } from "@/components/CheckoutNotice";
 import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { siteUrl } from "@/lib/pages";
+import { siteUrl, socialImage } from "@/lib/pages";
 
 const pricingUrl = `${siteUrl}/pricing`;
 
@@ -49,13 +49,16 @@ export const metadata: Metadata = {
       "Simple plans for removing image backgrounds and downloading transparent PNG files.",
     url: pricingUrl,
     siteName: "ClearPNG",
+    locale: "en_US",
     type: "website",
+    images: [socialImage],
   },
   twitter: {
     card: "summary_large_image",
     title: "ClearPNG Pricing - Simple Background Removal Plans",
     description:
       "Start free, then upgrade when you need more transparent PNG exports.",
+    images: [socialImage.url],
   },
 };
 
@@ -143,6 +146,7 @@ export default function PricingPage() {
     name: "ClearPNG image background remover",
     description:
       "Monthly image credits for removing backgrounds and downloading transparent PNG files.",
+    image: socialImage.url,
     brand: {
       "@type": "Brand",
       name: "ClearPNG",

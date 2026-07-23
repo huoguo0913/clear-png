@@ -28,6 +28,13 @@ export const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
   "https://clearpng.shop";
 
+export const socialImage = {
+  url: `${siteUrl}/og.png`,
+  width: 1200,
+  height: 630,
+  alt: "ClearPNG background remover and transparent PNG maker",
+};
+
 export const pages: Record<PageSlug, PageConfig> = {
   home: {
     slug: "home",
@@ -325,12 +332,15 @@ export function metadataForPage(page: PageConfig): Metadata {
       description: page.description,
       url,
       siteName: "ClearPNG",
+      locale: "en_US",
       type: "website",
+      images: [socialImage],
     },
     twitter: {
       card: "summary_large_image",
       title: page.title,
       description: page.description,
+      images: [socialImage.url],
     },
   };
 }
@@ -357,25 +367,6 @@ export function breadcrumbJsonLd(page: PageConfig) {
             },
           ]),
     ],
-  };
-}
-
-export function softwareApplicationJsonLd() {
-  return {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: "ClearPNG",
-    applicationCategory: "MultimediaApplication",
-    operatingSystem: "Web",
-    url: siteUrl,
-    description:
-      "ClearPNG removes image backgrounds and exports transparent PNG files for logos, signatures, product photos, and white-background images.",
-    offers: {
-      "@type": "AggregateOffer",
-      priceCurrency: "USD",
-      lowPrice: "0",
-      highPrice: "19.99",
-    },
   };
 }
 

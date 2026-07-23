@@ -8,7 +8,6 @@ import {
   faqJsonLd,
   pageOrder,
   pages,
-  softwareApplicationJsonLd,
   type PageConfig,
 } from "@/lib/pages";
 import { ArrowRight, LockKeyhole, MousePointerClick, Sparkles } from "lucide-react";
@@ -171,14 +170,6 @@ export function LandingPage({ page }: { page: PageConfig }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(page)) }}
       />
-      {page.slug === "home" ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(softwareApplicationJsonLd()),
-          }}
-        />
-      ) : null}
     </>
   );
 }
