@@ -33,7 +33,7 @@ export const pages: Record<PageSlug, PageConfig> = {
     slug: "home",
     path: "/",
     mode: "General Image",
-    title: "Free Image Background Remover & Transparent PNG Maker | ClearPNG",
+    title: "Free Background Remover & PNG Maker | ClearPNG",
     description:
       "Remove backgrounds from JPG, PNG, and WebP images online. Preview the transparent result and download a clean PNG in seconds.",
     keywords: [

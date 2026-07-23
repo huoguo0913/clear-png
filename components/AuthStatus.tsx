@@ -67,7 +67,7 @@ export function AuthStatus() {
       {auth.user.pictureUrl ? (
         <img
           src={auth.user.pictureUrl}
-          alt=""
+          alt={`${auth.user.name || "ClearPNG user"} profile picture`}
           className="h-8 w-8 rounded-full border border-slate-200"
           referrerPolicy="no-referrer"
         />
