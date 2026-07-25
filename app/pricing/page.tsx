@@ -253,15 +253,13 @@ export default function PricingPage() {
                     <div className="mt-auto grid gap-2">
                       <PricingCheckoutButton
                         plan={plan.planId}
+                        provider="creem"
                         featured={plan.featured}
                       >
-                        Pay with PayPal
-                      </PricingCheckoutButton>
-                      <PricingCheckoutButton
-                        plan={plan.planId}
-                        provider="creem"
-                      >
                         Pay with Creem
+                      </PricingCheckoutButton>
+                      <PricingCheckoutButton plan={plan.planId}>
+                        Pay with PayPal
                       </PricingCheckoutButton>
                     </div>
                   ) : (
