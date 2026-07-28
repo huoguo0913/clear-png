@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { pageOrder, pages } from "@/lib/pages";
+import { pageOrder, pages, supportEmail } from "@/lib/pages";
 
 export function SiteFooter() {
   const tools = pageOrder.map((slug) => pages[slug]);
@@ -44,6 +44,24 @@ export function SiteFooter() {
             >
               Pricing
             </Link>
+            <Link
+              href="/privacy"
+              className="text-sm text-slate-600 transition hover:text-ink"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/terms"
+              className="text-sm text-slate-600 transition hover:text-ink"
+            >
+              Terms of Service
+            </Link>
+            <a
+              href={`mailto:${supportEmail}`}
+              className="text-sm text-slate-600 transition hover:text-ink"
+            >
+              {supportEmail}
+            </a>
             <Link
               href="/sitemap.xml"
               className="text-sm text-slate-600 transition hover:text-ink"

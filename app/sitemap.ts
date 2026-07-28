@@ -18,5 +18,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly" as const,
       priority: 0.7,
     },
+    {
+      url: `${siteUrl}/privacy`,
+      lastModified,
+      changeFrequency: "yearly" as const,
+      priority: 0.4,
+    },
+    {
+      url: `${siteUrl}/terms`,
+      lastModified,
+      changeFrequency: "yearly" as const,
+      priority: 0.4,
+    },
   ];
 }

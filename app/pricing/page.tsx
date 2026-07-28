@@ -6,7 +6,7 @@ import { CheckoutNotice } from "@/components/CheckoutNotice";
 import { PricingCheckoutButton } from "@/components/PricingCheckoutButton";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { siteUrl, socialImage } from "@/lib/pages";
+import { siteUrl, socialImage, supportEmail } from "@/lib/pages";
 
 const pricingUrl = `${siteUrl}/pricing`;
 
@@ -279,6 +279,31 @@ export default function PricingPage() {
               Need a small top-up later? A simple one-time pack can be offered
               after launch: <strong className="text-ink">$2.99 for 5 images</strong>.
               Keep the public pricing page focused on the three main plans.
+            </div>
+
+            <div className="mt-4 rounded-lg border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-600">
+              Questions about plans, payments, or account access? Contact{" "}
+              <a
+                href={`mailto:${supportEmail}`}
+                className="font-semibold text-ink underline underline-offset-4"
+              >
+                {supportEmail}
+              </a>
+              . By using ClearPNG, you agree to the{" "}
+              <Link
+                href="/terms"
+                className="font-semibold text-ink underline underline-offset-4"
+              >
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="/privacy"
+                className="font-semibold text-ink underline underline-offset-4"
+              >
+                Privacy Policy
+              </Link>
+              .
             </div>
           </div>
         </section>

@@ -28,6 +28,8 @@ export const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
   "https://clearpng.shop";
 
+export const supportEmail = "support@clearpng.shop";
+
 export const socialImage = {
   url: `${siteUrl}/og.png`,
   width: 1200,
