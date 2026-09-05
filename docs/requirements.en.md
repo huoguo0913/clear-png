@@ -1,15 +1,21 @@
-# ClearPNG MVP Product Requirements Document
+# ClearPNG Product Requirements Document
 
-Version: 1.0  
-Date: 2026-07-13  
+Version: 1.1  
+Date: 2026-09-05  
 Project: ClearPNG  
-Stage: MVP
+Stage: Live MVP (with sign-in, credits, and payments)
 
 ## 1. Overview
 
-ClearPNG is an online image background removal tool. The MVP focuses on the core `image background remover` use case and prioritizes high-intent long-tail scenarios: making logo backgrounds transparent, turning signatures into transparent PNGs, removing white backgrounds, and cleaning up product photos.
+ClearPNG is an online image background removal tool. It focuses on the core `image background remover` use case and prioritizes high-intent long-tail scenarios: making logo backgrounds transparent, turning signatures into transparent PNGs, removing white backgrounds, and cleaning up product photos.
 
-The first version uses a lightweight architecture: Cloudflare Pages hosts the frontend, while a Cloudflare Worker or Pages Function acts as a secure API proxy to remove.bg. User images are not stored. Each image is processed for the current request only, and the resulting transparent PNG is returned directly to the browser for download.
+The current version uses a lightweight architecture deployed entirely on Cloudflare:
+
+- The frontend is built with Next.js (App Router) + React + TypeScript + Tailwind CSS, statically exported to `out/` via `output: "export"` and hosted on Cloudflare Pages.
+- The backend runs on Cloudflare Pages Functions (the `functions/` directory) and acts as a secure API proxy to the remove.bg API.
+- User images are not stored. Each image is processed for the current request only, and the resulting transparent PNG is streamed straight back to the browser for download.
+- A Cloudflare D1 database (binding name `CLEARPNG_DB`) stores users, sessions, image credits, orders, and payment webhook records.
+- Google sign-in is supported. Signed-in users receive free monthly credits and can buy paid credits through PayPal or Creem.
 
 ## 2. Product Positioning
 
@@ -24,37 +30,38 @@ Free image background remover and transparent PNG maker for logos, signatures, a
 ### 2.3 Core Value
 
 - Users can remove image backgrounds and export transparent PNGs without installing Photoshop.
-- The product provides a direct upload, preview, and download experience for common use cases such as logos, signatures, product photos, and white-background images.
+- The product provides a direct upload, preview, and download experience for logos, signatures, product photos, and white-background images.
 - User images are not stored, reducing privacy concerns.
+- Signed-in users get free monthly credits; paid credits are purchased via PayPal / Creem to control API cost.
 - SEO-focused landing pages use a real working tool to capture organic search demand.
 
-## 3. MVP Goals
+## 3. Goals
 
 ### 3.1 Business Goals
 
-- Launch a usable online background removal tool.
-- Validate whether `image background remover` and related long-tail keywords can generate organic traffic.
-- Validate whether users complete the upload, process, preview, and download flow.
-- Leave room for future paid features, batch processing, and API services.
+- Run a usable background removal tool deployed on Cloudflare.
+- Validate whether `image background remover` and related long-tail keywords generate organic traffic.
+- Validate whether users complete the upload, process, preview, and download loop.
+- Validate willingness to pay and cover remove.bg API cost through free credits plus paid plans.
 
 ### 3.2 User Goals
 
-- Users can remove a background within 30 seconds.
+- Signed-in users can process images with their monthly free credits.
 - Users can download a transparent PNG directly.
-- Users can preview the result and decide whether it works for logos, signatures, product photos, or similar use cases.
+- Users can preview results on checkerboard, white, and black backgrounds to judge fit for logos, signatures, and product photos.
+- When free credits run out, users can buy more on the pricing page via PayPal or Creem.
 
 ### 3.3 Non-Goals
 
-The MVP will not include:
+The current version does not include:
 
-- User registration or login.
 - Image history.
-- Cloud image storage.
+- Cloud storage of uploaded images.
 - Batch processing.
 - Advanced online editing.
-- Payments or subscriptions.
 - A custom AI model.
 - A multilingual website.
+- Sign-in providers other than Google.
 
 ## 4. Target Users and Use Cases
 
@@ -93,7 +100,7 @@ The MVP will not include:
 - remove background from PNG
 - remove background from JPG
 
-### 5.3 MVP Page Plan
+### 5.3 Page Plan
 
 | Page | URL | Target Keywords |
 | --- | --- | --- |
@@ -102,8 +109,11 @@ The MVP will not include:
 | Signature page | `/signature-background-remover` | remove background from signature |
 | Product photo page | `/product-photo-background-remover` | product photo background remover |
 | White background page | `/remove-white-background` | remove white background from image |
+| Pricing page | `/pricing` | ClearPNG pricing, background remover plans |
+| Privacy policy | `/privacy` | — |
+| Terms of service | `/terms` | — |
 
-Every page must include the real upload tool. Pages should not be article-only or purely promotional.
+Every tool page embeds the same real, working upload component — pages are not article-only or purely promotional. `robots.txt` and `sitemap.xml` are generated in code.
 
 ## 6. Core User Flow
 
@@ -111,21 +121,43 @@ Every page must include the real upload tool. Pages should not be article-only o
 
 1. The user lands on a page.
 2. The user clicks the upload area or drags an image into it.
-3. The frontend validates file type and file size.
-4. The frontend shows an original image preview.
+3. The frontend validates file type (JPG/JPEG/PNG/WebP) and size (≤5MB).
+4. The frontend shows an original preview using `URL.createObjectURL()`.
 5. The user clicks `Remove Background`.
-6. The frontend sends the image to a Cloudflare Worker or Pages Function.
-7. The backend proxy calls the remove.bg API.
-8. The backend returns a transparent PNG.
-9. The frontend displays the processed result.
-10. The user downloads the PNG.
+6. The frontend sends the image as `multipart/form-data` to `/api/remove-bg`.
+7. The backend validates the session and remaining credits, then proxies to the remove.bg API.
+8. The backend consumes one credit and returns a transparent PNG (`image/png`).
+9. The frontend displays the result with switchable checkerboard/white/black backgrounds.
+10. The user downloads `clearpng-result.png` via a Blob URL.
 
-### 6.2 Error Flow
+Anonymous users who try to process an image receive a 401 and are guided to Google sign-in; users with no credits receive a 402 and are guided to `/pricing`.
+
+### 6.2 Payment Flow
+
+PayPal:
+
+1. A signed-in user picks a plan on `/pricing` and clicks `Pay with PayPal`.
+2. The frontend calls `POST /api/paypal/create-order`; the backend creates a PayPal order and returns an `approvalUrl`.
+3. After the buyer approves payment, PayPal redirects back to `/api/paypal/capture-order`.
+4. The backend captures the order, updates its status, grants credits, and redirects to `/?checkout=success#tool`.
+5. The PayPal webhook (`/api/paypal/webhook`) acts as a fallback; after signature verification it handles `CHECKOUT.ORDER.APPROVED` and `PAYMENT.CAPTURE.*` events.
+
+Creem:
+
+1. A signed-in user clicks `Pay with Creem`.
+2. The frontend calls `POST /api/creem/create-checkout`; the backend creates a Creem checkout and returns a `checkoutUrl`.
+3. After payment the user is redirected to `/api/creem/success`; the backend verifies the redirect signature and grants credits.
+4. The Creem webhook (`/api/creem/webhook`) verifies the `creem-signature` HMAC and handles the `checkout.completed` event as a fallback.
+
+### 6.3 Error Flow
 
 - Unsupported format: ask the user to upload JPG, PNG, or WebP.
-- File too large: ask the user to compress the image or upload a smaller one.
-- API quota exhausted: show a temporary service busy message and ask the user to try again later.
-- remove.bg processing failed: ask the user to retry or choose another image.
+- File too large: ask for an image under 5MB.
+- Not signed in (401): guide the user through Google sign-in.
+- Out of credits (402): guide the user to the pricing page.
+- remove.bg quota/rate limit (402/429): show a temporary service-busy message.
+- remove.bg processing failure: ask the user to retry or choose another image.
+- Payment not configured / verification failed: show a checkout-failed or not-configured message.
 - Network failure: ask the user to check the connection and retry.
 
 ## 7. Functional Requirements
@@ -134,180 +166,123 @@ Every page must include the real upload tool. Pages should not be article-only o
 
 Required:
 
-- Click-to-upload.
-- Drag-and-drop upload.
+- Click-to-upload and drag-and-drop upload.
 - Support for JPG, JPEG, PNG, and WebP.
-- Frontend file size validation with a 5MB MVP limit.
-- Original image preview after upload.
-- Ability to select another image.
+- File size limited to 5MB on both frontend and backend.
+- Original image preview after upload, with the ability to select another image.
+- A loading state during processing and clear error messages.
 
-Out of scope for the MVP:
+Out of scope:
 
 - Multiple image upload.
-- Import from URL.
-- Import from Google Drive, Dropbox, or other cloud storage providers.
+- Import from URL or third-party cloud storage.
 
 ### 7.2 Background Removal
 
-Required:
-
-- Processing starts after the user clicks the action button.
-- A loading state is shown during processing.
-- A transparent PNG is returned after success.
-- A clear error message is shown after failure.
-
-API contract:
-
-- Frontend request: `POST /api/remove-bg`
-- Request format: `multipart/form-data`
-- Image field name: `image_file`
-- Successful response format: `image/png`
+- Endpoint: `POST /api/remove-bg`, `multipart/form-data`, image field name `image_file`.
+- Sign-in and at least one available credit are required.
+- The backend sends `image_file` plus `size=auto` to remove.bg with the key in the `X-Api-Key` header.
+- Success responses use `Content-Type: image/png` and `Cache-Control: no-store`.
+- A credit is consumed and a `usage_events` row is written only after remove.bg returns successfully.
 
 ### 7.3 Result Preview
 
-Required:
+- Original image and processed transparent PNG shown side by side.
+- A checkerboard background identifies transparent areas.
+- Three preview backgrounds: checkerboard (Grid), white, and black.
+- The download filename is fixed to `clearpng-result.png`, using a browser Blob URL with no cloud storage dependency.
 
-- Show the original image.
-- Show the processed transparent PNG.
-- Use a checkerboard background so users can identify transparent areas.
-- Provide at least 3 preview backgrounds: checkerboard, white, and black.
+### 7.4 Accounts and Sign-In
 
-Optional:
+- Google OAuth only (scope: `openid email profile`).
+- Start: `GET /api/auth/google/start`; callback: `GET /api/auth/google/callback`.
+- Session cookie (`clearpng_session`) is HttpOnly and SameSite=Lax, with Secure over HTTPS.
+- Only the SHA-256 hash of the session token is stored; sessions last 30 days and can be revoked via `POST /api/auth/logout`.
+- `GET /api/auth/me` returns the current user and remaining credits for the header avatar and credit badge.
 
-- Before/after comparison slider.
-- Automatic transparent-edge trimming.
+### 7.5 Credit System
 
-### 7.4 Download
+- Free credits: 3 images per month for every signed-in user, auto-granted per UTC calendar month and expiring at month end.
+- Paid plans:
 
-Required:
+| Plan | Price | Credits | Validity |
+| --- | --- | --- | --- |
+| Free | $0 | 3 images / month | Current month |
+| Starter | $6.99 | 20 images | 30 days after purchase |
+| Pro | $19.99 | 100 images | 30 days after purchase |
 
-- Download the transparent PNG.
-- Default download filename: `clearpng-result.png`.
-- Download must not depend on cloud storage.
+- Credits are consumed from the earliest-expiring grant first.
+- Each successful processing writes a `usage_events` row (with User-Agent and CF-Connecting-IP).
+- Paid grants are idempotent per order/checkout ID, so webhook retries never double-grant.
 
-Out of scope for the MVP:
+### 7.6 Payments
 
-- JPG download.
-- WebP download.
-- Custom-size download.
-- Batch ZIP download.
+- Each paid plan offers both PayPal and Creem checkout.
+- PayPal: Orders v2 with `intent=CAPTURE`, supporting sandbox / live via `PAYPAL_ENV`.
+- Creem: Checkout API, supporting test / live via `CREEM_ENV`, with separate product IDs for Starter and Pro.
+- Successful payments are recorded in `paypal_orders` / `creem_orders` and credits are granted through `credit_grants` (source `paypal` / `creem`).
+- Raw webhook payloads are stored in `paypal_webhook_events` / `creem_webhook_events` and de-duplicated by event ID.
 
-### 7.5 Use Case Modes
+### 7.7 Use Case Modes
 
-The UI may expose the following mode entry points:
-
-- General Image
-- Logo
-- Signature
-- Product Photo
-
-For the MVP, these modes can reuse the same remove.bg processing logic. Differences should mainly appear in page copy, examples, FAQ content, default preview background, and expectation-setting.
+The UI exposes General Image, Logo, Signature, and Product Photo modes, all reusing the same remove.bg processing logic. Differences appear in page copy, examples, FAQ content, preview hints, and expectation-setting.
 
 ## 8. Page Requirements
 
 ### 8.1 Home Page
 
-Page goals:
+- H1: Free Image Background Remover.
+- The upload tool (`#tool`) is visible in the first viewport and not hidden behind marketing content.
+- Modules: upload tool, result preview, use case entries (Logo / Signature / Product Photo / White Background), feature highlights, three-step workflow, FAQ.
 
-- Target the primary keyword `image background remover`.
-- Show the upload area immediately in the first viewport.
-- Help users complete upload, processing, and download quickly.
+### 8.2 Logo Page (`/remove-white-background-from-logo`)
 
-First viewport content:
+- H1: Remove White Background from Logo.
+- Emphasizes transparent PNGs for websites, slides, stores, and social profiles.
 
-- Brand name: ClearPNG
-- H1: Free Image Background Remover
-- Subtitle: Remove backgrounds from JPG, PNG, and WebP images. Download a transparent PNG in seconds.
-- Upload area.
-- Supported format and size hint.
+### 8.3 Signature Page (`/signature-background-remover`)
 
-Page modules:
+- H1: Signature Background Remover.
+- Emphasizes scanned/photographed signatures for Word, PDF, invoices, forms, and contracts.
 
-- Upload tool.
-- Result preview.
-- Use case entries: Logo, Signature, Product Photo, White Background.
-- Brief feature explanation.
-- FAQ.
+### 8.4 Product Photo Page (`/product-photo-background-remover`)
 
-### 8.2 Logo Page
+- H1: Product Photo Background Remover.
+- Emphasizes Shopify, Amazon, Etsy, and social media product images.
 
-Page goals:
+### 8.5 White Background Page (`/remove-white-background`)
 
-- Target `remove white background from logo`.
-- Emphasize transparent PNG exports for websites, slides, stores, and social profiles.
+- H1: Remove White Background from Image.
+- Targets white/light/solid backgrounds converted to transparency.
 
-Recommended H1:
+### 8.6 Pricing Page (`/pricing`)
 
-```text
-Remove White Background from Logo
-```
-
-Key copy:
-
-- Make your logo background transparent.
-- Export a clean PNG for websites, slides, stores, and social media.
-- Preview your logo on white, black, and transparent backgrounds.
-
-### 8.3 Signature Page
-
-Page goals:
-
-- Target `remove background from signature` and `make signature transparent PNG`.
-- Emphasize scanned signatures, photographed signatures, PDFs, Word documents, and contracts.
-
-Recommended H1:
-
-```text
-Signature Background Remover
-```
-
-Key copy:
-
-- Turn a scanned or photographed signature into a transparent PNG.
-- Use it in Word, PDF, invoices, forms, and contracts.
-- No image storage. Your file is processed and returned immediately.
-
-### 8.4 Product Photo Page
-
-Page goals:
-
-- Target `product photo background remover`.
-- Emphasize ecommerce images, main product images, white backgrounds, and transparent cutouts.
-
-Recommended H1:
-
-```text
-Product Photo Background Remover
-```
-
-Key copy:
-
-- Remove product photo backgrounds for online stores.
-- Create clean product cutouts for Shopify, Amazon, Etsy, and social media.
+- Shows Free / Starter / Pro plan cards.
+- Paid cards offer `Pay with Creem` and `Pay with PayPal` buttons; anonymous clicks are redirected to Google sign-in first.
+- Payment outcomes are shown via a `?checkout=success|cancelled|failed` notice.
+- Includes pricing FAQ, Product structured data, and links to Terms and Privacy.
 
 ## 9. API Requirements
 
-### 9.1 Endpoint
+### 9.1 Endpoint List
 
-```text
-POST /api/remove-bg
-```
+| Endpoint | Method | Purpose |
+| --- | --- | --- |
+| `/api/remove-bg` | POST | Proxies to remove.bg, returns `image/png` |
+| `/api/auth/google/start` | GET | Starts Google OAuth |
+| `/api/auth/google/callback` | GET | OAuth callback, establishes the session |
+| `/api/auth/me` | GET | Current user and remaining credits |
+| `/api/auth/logout` | POST | Revokes the current session |
+| `/api/paypal/create-order` | POST | Creates a PayPal order |
+| `/api/paypal/capture-order` | GET | PayPal return URL; captures and grants credits |
+| `/api/paypal/webhook` | POST | PayPal webhook (signature verified) |
+| `/api/creem/create-checkout` | POST | Creates a Creem checkout |
+| `/api/creem/success` | GET | Creem return URL (signature verified, grants credits) |
+| `/api/creem/webhook` | POST | Creem webhook (HMAC verified) |
 
-### 9.2 Request
+### 9.2 Remove-Background Request and Response
 
-Content-Type:
-
-```text
-multipart/form-data
-```
-
-Fields:
-
-| Field | Type | Required | Description |
-| --- | --- | --- | --- |
-| `image_file` | File | Yes | The user-uploaded image |
-
-### 9.3 Response
+Request: `multipart/form-data` with field `image_file` (File, required).
 
 Success:
 
@@ -324,324 +299,192 @@ Failure:
 }
 ```
 
-### 9.4 Worker Processing Logic
+### 9.3 remove.bg Proxy Logic
 
 1. Validate that the request method is POST.
-2. Parse `multipart/form-data`.
-3. Validate that `image_file` exists.
-4. Validate file size.
-5. Validate file type.
-6. Create a new `FormData` request for the remove.bg API.
-7. Send the API key using the `X-Api-Key` request header.
-8. Receive the image stream returned by remove.bg.
-9. Set `Cache-Control: no-store`.
-10. Return the image directly to the frontend.
+2. Check that `REMOVE_BG_API_KEY` and the D1 binding exist.
+3. Resolve the current user from the session cookie; return 401 if anonymous.
+4. Summarize active credits; return 402 if fewer than one remains.
+5. Parse `multipart/form-data` and validate that `image_file` exists, is ≤5MB, and is JPEG/PNG/WebP.
+6. Build a new `FormData` (`image_file` + `size=auto`) and call `https://api.remove.bg/v1.0/removebg`.
+7. Send the key in the `X-Api-Key` header; map 402/429 to a service-busy message and other failures to 502.
+8. On success, consume a credit and write a usage event.
+9. Set `Cache-Control: no-store` and stream the image back to the frontend.
 
-### 9.5 Environment Variable
+### 9.4 Environment Variables
 
 ```text
 REMOVE_BG_API_KEY=remove.bg API key
+GOOGLE_CLIENT_ID=Google OAuth client ID
+GOOGLE_CLIENT_SECRET=Google OAuth client secret
+PAYPAL_CLIENT_ID=PayPal client ID
+PAYPAL_CLIENT_SECRET=PayPal client secret
+PAYPAL_ENV=sandbox|live
+PAYPAL_WEBHOOK_ID=PayPal webhook ID
+CREEM_API_KEY=Creem API key
+CREEM_ENV=test|live
+CREEM_STARTER_PRODUCT_ID=Creem Starter product ID
+CREEM_PRO_PRODUCT_ID=Creem Pro product ID
+CREEM_WEBHOOK_SECRET=Creem webhook secret
+APP_ORIGIN=canonical site origin (used for OAuth and payment redirects)
 ```
 
-The API key must only be stored in Cloudflare environment variables. It must not be exposed in frontend code, build output, or logs.
+Secrets must only be stored in Cloudflare environment variables and must never be exposed in frontend code, build output, or logs.
 
 ## 10. Technical Approach
 
 ### 10.1 Frontend
 
-Recommended stack:
-
-- Vite + React + TypeScript.
-- Static deployment on Cloudflare Pages.
-- Use browser-local `URL.createObjectURL()` for image previews.
-- Use Blob URLs to download the processed PNG.
+- Next.js (App Router) + React + TypeScript + Tailwind CSS.
+- `next.config.mjs` uses `output: "export"` to produce static files in `out/`, deployed to Cloudflare Pages.
+- Image previews use browser-local `URL.createObjectURL()`; downloads use Blob URLs.
+- Icons use lucide-react.
 
 ### 10.2 Backend
 
-Recommended stack:
+- Cloudflare Pages Functions (the `functions/` directory, file-based routing).
+- Shared logic lives in `functions/_shared/`: `auth.js` (session/cookie/OAuth helpers), `credits.js` (credits and plans), `paypal.js`, and `creem.js`.
+- User images are never stored; the backend only acts as a secure remove.bg proxy and handles sign-in, credits, and payments.
+- Persistence uses Cloudflare D1 (binding `CLEARPNG_DB`); no object storage is used.
 
-- Cloudflare Worker or Cloudflare Pages Functions.
-- No database.
-- No object storage.
-- No user image persistence.
-- Backend acts only as a secure proxy for the remove.bg API.
+### 10.3 Database Migrations
 
-### 10.3 Deployment
+Apply in order:
 
-Recommended setup:
+- `migrations/0001_auth.sql`: `users`, `sessions`, `login_events`.
+- `migrations/0002_paypal_credits.sql`: `credit_grants`, `usage_events`, `paypal_orders`.
+- `migrations/0003_paypal_webhooks.sql`: `paypal_webhook_events` and a unique grant index for PayPal orders.
+- `migrations/0004_creem_checkout.sql`: `creem_orders`, `creem_webhook_events`, and a unique grant index for Creem checkouts.
 
-- Frontend: Cloudflare Pages.
-- API: Cloudflare Worker or Pages Functions.
-- Domain: managed through Cloudflare.
-- HTTPS: provided by Cloudflare.
+### 10.4 Deployment
+
+- The static export and Pages Functions deploy together to Cloudflare Pages.
+- Configure the environment variables above in the Pages project settings and bind the D1 database as `CLEARPNG_DB`.
+- HTTPS is provided automatically by Cloudflare.
+- Configure the PayPal webhook to point at `/api/paypal/webhook` and the Creem webhook at `/api/creem/webhook`.
 
 ## 11. Security, Limits, and Privacy
 
 ### 11.1 File Limits
 
-MVP limits:
-
 - Maximum file size: 5MB.
 - Supported formats: JPG, JPEG, PNG, WebP.
 - Unsupported formats: SVG, GIF, PSD, PDF.
 
-### 11.2 Abuse Protection
+### 11.2 Abuse and Cost Protection
 
-Minimum MVP requirements:
+- File size and type are validated on both frontend and backend.
+- The remove-background endpoint requires sign-in and is limited by per-account monthly credits.
+- Error responses never expose remove.bg / PayPal / Creem secrets.
+- All API responses set `Cache-Control: no-store`.
+- Payment webhooks require signature verification (PayPal verify-webhook-signature; Creem HMAC-SHA256), events are de-duplicated by ID, and credit grants are idempotent per order.
+- OAuth uses a state parameter for CSRF protection and validates return URLs against same-origin paths.
 
-- Frontend file size validation.
-- Backend file size validation.
-- Error responses must not expose the remove.bg API key.
-- Responses must set `Cache-Control: no-store`.
-
-Future improvements:
-
-- Cloudflare Turnstile.
-- IP-based rate limiting.
-- KV or D1 tracking for daily free usage limits.
-- Higher limits for logged-in users.
+Future additions: Cloudflare Turnstile, IP-based rate limiting.
 
 ### 11.3 Privacy Statement
 
-The website must clearly state:
+The site (including `/privacy`) clearly states:
 
-- ClearPNG does not store user images.
-- Images are used only for the current background removal request.
-- Processed results are returned directly to the browser.
-- No image history is provided.
+- ClearPNG does not store uploaded images or processed results; images are used only for the current background removal request.
+- Results are returned directly to the browser and no image history is provided.
+- Account data (Google email, name, picture) and payment records are used only for sign-in, credits, and order management.
 
 ## 12. Data and Analytics
 
-The MVP should include basic event tracking to decide whether the product is worth further investment.
-
-### 12.1 Key Events
-
-- `page_view`
-- `upload_started`
-- `upload_validated`
-- `remove_bg_clicked`
-- `remove_bg_success`
-- `remove_bg_failed`
-- `download_clicked`
-
-### 12.2 Core Metrics
-
-- Page views.
-- Upload rate: users who upload / page visitors.
-- Processing success rate: successful removals / uploads.
-- Download rate: downloads / successful removals.
-- API cost: number of remove.bg calls consumed.
-- Source keywords and landing page performance.
+- Google Analytics 4 is integrated (Measurement ID `G-BCN2YV00E6`) for page traffic.
+- The frontend dispatches `clearpng:analytics` custom events during the upload/processing flow: `upload_started`, `upload_validated`, `upload_failed_validation`, `remove_bg_clicked`, `remove_bg_success`, `remove_bg_failed`, and `download_clicked`.
+- The backend records every successful removal in the `usage_events` table (user, grant, User-Agent, IP).
+- Core metrics: page views, upload rate, processing success rate, download rate, remove.bg call cost, payment conversion rate, and source keyword / landing page performance.
 
 ## 13. SEO Requirements
 
 ### 13.1 Basic SEO
 
-Each page must have:
+Each page has a unique title, meta description, H1, canonical URL, Open Graph/Twitter tags, structured data, and a real tool visible in the first viewport.
 
-- Unique title.
-- Unique meta description.
-- Unique H1.
-- Canonical URL.
-- Open Graph title and description.
-- Structured FAQ data.
-- A clear first-viewport tool experience.
+Structured data implemented:
+
+- Site-wide Organization / WebSite (`app/layout.tsx`).
+- FAQPage and BreadcrumbList on each tool page.
+- Product + Offer on the pricing page.
 
 ### 13.2 Example Titles
 
-Home:
-
-```text
-Free Image Background Remover & Transparent PNG Maker | ClearPNG
-```
-
-Logo page:
-
-```text
-Remove White Background from Logo Online | ClearPNG
-```
-
-Signature page:
-
-```text
-Signature Background Remover - Make Signature Transparent | ClearPNG
-```
-
-Product photo page:
-
-```text
-Product Photo Background Remover Online | ClearPNG
-```
-
-### 13.3 FAQ Examples
-
-Home FAQ:
-
-- Is ClearPNG free to use?
-- What image formats are supported?
-- Will my image be stored?
-- Can I download a transparent PNG?
-- Can I remove a white background from a logo?
-
-Logo page FAQ:
-
-- How do I make my logo background transparent?
-- Can I remove a white background from a PNG logo?
-- Will the logo edges stay clean?
-
-Signature page FAQ:
-
-- How do I make a signature transparent?
-- Can I use the transparent signature in Word or PDF?
-- Does ClearPNG store my signature image?
+- Home: `Free Background Remover & PNG Maker | ClearPNG`
+- Logo page: `Remove White Background from Logo Online | ClearPNG`
+- Signature page: `Signature Background Remover - Make Signature Transparent | ClearPNG`
+- Product photo page: `Product Photo Background Remover Online | ClearPNG`
+- White background page: `Remove White Background from Image Online | ClearPNG`
+- Pricing page: `ClearPNG Pricing - Simple Background Removal Plans`
 
 ## 14. Design Requirements
 
-### 14.1 Style
-
-- Simple, tool-focused, and trustworthy.
-- The first viewport should emphasize the upload action instead of a marketing-heavy hero image.
-- The main upload tool must not be hidden below the fold.
-- The visual system should highlight transparent PNGs, checkerboard previews, and before/after comparison.
-
-### 14.2 Key Components
-
-- Top navigation: Logo, Tools, FAQ.
-- Upload card.
-- Processing state.
-- Result preview area.
-- Preview background switcher.
-- Download button.
-- Error messages.
-
-### 14.3 Mobile
-
-The mobile experience must ensure:
-
-- Users can upload images from a phone.
-- The upload button is large enough to tap comfortably.
-- Processing state is clear.
-- The download button is easy to find after a result appears.
+- Simple, tool-focused, and trustworthy; the first viewport emphasizes the upload action.
+- Key components: top navigation (logo, Logo/Signature/Product Photo/White Background/Pricing links, auth state with credits, Upload button), upload card, processing state, result preview area, background switcher, download button, and error/checkout notices.
+- Mobile users must be able to upload comfortably, see clear processing state, and find the download button easily.
 
 ## 15. Acceptance Criteria
 
 ### 15.1 Functional Acceptance
 
-- Users can upload a JPG image and successfully remove its background.
-- Users can upload a PNG image and successfully remove its background.
-- Users can upload a WebP image and successfully remove its background.
-- Images over 5MB are rejected with a clear message.
-- After successful processing, users can preview the transparent PNG.
-- Users can download the transparent PNG.
-- No historical image appears after page refresh.
-- The frontend does not expose the remove.bg API key.
+- Anonymous users are guided to sign in when processing; Google sign-in returns them to the original page.
+- Signed-in users automatically receive 3 free credits per month, and the header shows remaining credits.
+- Users can upload JPG/PNG/WebP, remove the background, preview the transparent PNG, and download `clearpng-result.png`.
+- Files over 5MB or unsupported formats are rejected on both ends with clear messages.
+- Running out of credits returns 402 and guides users to the pricing page.
+- PayPal sandbox and Creem test checkout complete successfully, credits are granted after payment, and replayed/refreshed webhooks do not double-grant.
+- No historical image appears after refresh; no API secrets are exposed in the frontend or build output.
 
 ### 15.2 Deployment Acceptance
 
-- The website is accessible through Cloudflare Pages.
-- The API is accessible through Cloudflare Worker or Pages Functions.
-- `REMOVE_BG_API_KEY` is configured in production.
-- HTTPS works correctly.
-- Main pages return HTTP 200.
-- `robots.txt` and `sitemap.xml` are accessible.
+- The site is accessible through Cloudflare Pages with working HTTPS.
+- `/api/*` is accessible through Pages Functions.
+- All environment variables are configured and D1 (`CLEARPNG_DB`) is bound with all four migrations applied.
+- Main pages return 200 and `/robots.txt` and `/sitemap.xml` are accessible.
+- PayPal and Creem webhooks are configured and pass signature verification.
 
 ### 15.3 SEO Acceptance
 
-- The home page and core use case pages have unique title, description, and H1 values.
+- The home, use case, and pricing pages have unique title, description, and H1 values.
 - The first viewport includes the real upload tool.
-- Use case pages are not simple duplicates and include scenario-specific copy.
+- Use case pages carry scenario-specific copy rather than duplicates.
 - The site has been submitted to Google Search Console.
 
 ## 16. Milestones
 
-### Milestone 1: Usable MVP
-
-Goal: complete the upload, processing, preview, and download loop.
-
-Scope:
-
-- Home page.
-- Worker API or Pages Function.
-- remove.bg API integration.
-- Transparent PNG download.
-- Basic error messages.
-
-### Milestone 2: SEO Use Case Pages
-
-Goal: start capturing long-tail search demand.
-
-Scope:
-
-- Logo page.
-- Signature page.
-- Product photo page.
-- White background page.
-- FAQ and basic structured data.
-
-### Milestone 3: Experience Optimization
-
-Goal: improve download rate and repeat usage.
-
-Scope:
-
-- Before/after comparison.
-- White, black, and checkerboard preview backgrounds.
-- Automatic transparent-edge trimming.
-- Local background color export.
-
-### Milestone 4: Growth and Monetization Preparation
-
-Goal: control cost and test willingness to pay.
-
-Scope:
-
-- Rate limiting.
-- Turnstile.
-- Free usage quota.
-- Batch processing entry point.
-- Pro feature waitlist.
+- Milestone 1 (done): home page, remove.bg proxy, transparent PNG download, basic error messages.
+- Milestone 2 (done): logo, signature, product photo, and white-background pages plus FAQ and structured data.
+- Milestone 3 (done): Google sign-in, D1, free credits, PayPal and Creem payments, pricing page.
+- Milestone 4 (partially done): checkerboard/white/black previews shipped; before/after comparison slider, automatic transparent-edge trimming, and local background-color export remain.
+- Milestone 5 (planned): Turnstile, rate limiting, batch processing, one-time credit top-ups, Pro features.
 
 ## 17. Risks and Mitigations
 
 ### 17.1 API Cost Risk
 
-Risk: remove.bg charges by usage, and free traffic can create cost pressure.
+remove.bg charges per use. Mitigations: 5MB file limit, sign-in with monthly per-account credits, only 3 free images per month, paid plans covering cost, idempotent webhook grants, and Turnstile later.
 
-Mitigations:
+### 17.2 Payment and Reconciliation Risk
 
-- Limit file size in the MVP.
-- Add daily free usage limits later.
-- Add Turnstile to reduce abuse.
-- Put high-cost features behind login or paid plans.
+Mitigations: both PayPal and Creem use verified redirects plus verified webhooks as a double safety net; orders and webhook events are persisted; credit grants are idempotent per order.
 
-### 17.2 SEO Competition Risk
+### 17.3 SEO Competition Risk
 
-Risk: primary keywords are competitive and dominated by high-authority sites.
+Primary keywords are competitive. Mitigations: prioritize logo, signature, white-background, and product photo pages, each with a real tool.
 
-Mitigations:
+### 17.4 Processing Quality Risk
 
-- Do not rely only on the primary keyword page.
-- Prioritize use case pages for logos, signatures, white backgrounds, and product photos.
-- Include a real tool on every page instead of generic content.
-
-### 17.3 Processing Quality Risk
-
-Risk: remove.bg may mishandle thin logo lines, handwritten signatures, or fine details.
-
-Mitigations:
-
-- Set expectations that results work for most images.
-- Later add local white-background-to-transparent algorithms for logo and signature use cases.
-- Provide retry and preview background switching.
+Thin logo lines and signatures may be mishandled. Mitigations: set expectations in copy, offer retry and multiple preview backgrounds, and consider a local white-to-transparent algorithm later.
 
 ## 18. Future Expansion
 
 - Batch background removal.
-- Custom background color export.
-- Automatic transparent-edge trimming.
+- Before/after comparison slider, automatic transparent-edge trimming, custom background color export.
+- One-time credit top-ups (e.g. $2.99 for 5 images).
 - Logo size templates: favicon, social avatar, website header.
 - Signature enhancement: darken strokes and remove paper shadows.
 - Product photo templates: white background, square image, social image.
-- User accounts and image history.
-- API service.
-- Paid subscription.
+- Cloudflare Turnstile and finer rate limiting.
+- Image history (requires explicit opt-in and clear privacy messaging).
+- API service and subscription plans.
