@@ -256,7 +256,7 @@ export default function PricingPage() {
                         provider="creem"
                         featured={plan.featured}
                       >
-                        Pay with Creem
+                        Pay with card
                       </PricingCheckoutButton>
                       <PricingCheckoutButton plan={plan.planId}>
                         Pay with PayPal
