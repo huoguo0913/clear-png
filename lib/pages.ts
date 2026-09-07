@@ -26,9 +26,9 @@ export type PageConfig = {
 
 export const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-  "https://clearpng.shop";
+  "https://png.my99ai.com";
 
-export const supportEmail = "support@clearpng.shop";
+export const supportEmail = "support@png.my99ai.com";
 
 export const socialImage = {
   url: `${siteUrl}/og.png`,
