@@ -4,13 +4,13 @@ export const paidPlans = {
   starter: {
     name: "Starter",
     credits: 20,
-    amount: "6.99",
+    amount: "1",
     currency: "USD",
   },
   pro: {
     name: "Pro",
     credits: 100,
-    amount: "19.99",
+    amount: "2",
     currency: "USD",
   },
 };
