@@ -60,8 +60,8 @@ Every tool page embeds the same working upload component. `robots.txt` and `site
 Credits are tracked in the D1 `credit_grants` table. Each successful background removal consumes one credit and writes a `usage_events` row.
 
 - Free: 3 images per month (auto-granted to every signed-in user).
-- Starter: $6.99 / month for 20 images.
-- Pro: $19.99 / month for 100 images.
+- Starter: $1 / month for 20 images.
+- Pro: $2 / month for 100 images.
 
 Paid credits are valid for 30 days after purchase. Paid grants are idempotent per order/checkout ID, so webhook retries do not double-grant.
 
