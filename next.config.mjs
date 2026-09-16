@@ -2,9 +2,9 @@
 const nextConfig = {
   output: "export",
   poweredByHeader: false,
-  experimental: {
-    // Disable Turbopack for build to fix static export of dynamic routes
-    turbo: undefined,
+  // Force webpack instead of turbopack for static export
+  webpack: (config) => {
+    return config;
   },
 };
 
