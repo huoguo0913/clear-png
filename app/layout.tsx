@@ -10,7 +10,7 @@ const inter = Inter({
   display: "swap",
 });
 
-const googleAnalyticsId = "G-BCN2YV00E6";
+const googleAnalyticsId = "G-2D0BVBNJF6";
 
 export const metadata: Metadata = metadataForPage(pages.home);
 

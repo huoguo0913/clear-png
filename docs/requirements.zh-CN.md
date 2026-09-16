@@ -392,7 +392,7 @@ APP_ORIGIN=站点规范源（用于 OAuth 与支付回跳）
 
 ## 12. 数据与分析
 
-- 已接入 Google Analytics 4（Measurement ID：`G-BCN2YV00E6`）统计页面访问。
+- 已接入 Google Analytics 4（Measurement ID：`G-2D0BVBNJF6`）统计页面访问。
 - 前端在上传与处理流程中通过 `clearpng:analytics` 自定义事件派发：`upload_started`、`upload_validated`、`upload_failed_validation`、`remove_bg_clicked`、`remove_bg_success`、`remove_bg_failed`、`download_clicked`。
 - 后端通过 `usage_events` 表记录每次成功抠图（用户、grant、User-Agent、IP）。
 - 核心指标：页面访问量、上传率、处理成功率、下载率、remove.bg 调用成本、付费转化率、来源关键词与落地页表现。

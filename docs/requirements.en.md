@@ -392,7 +392,7 @@ The site (including `/privacy`) clearly states:
 
 ## 12. Data and Analytics
 
-- Google Analytics 4 is integrated (Measurement ID `G-BCN2YV00E6`) for page traffic.
+- Google Analytics 4 is integrated (Measurement ID `G-2D0BVBNJF6`) for page traffic.
 - The frontend dispatches `clearpng:analytics` custom events during the upload/processing flow: `upload_started`, `upload_validated`, `upload_failed_validation`, `remove_bg_clicked`, `remove_bg_success`, `remove_bg_failed`, and `download_clicked`.
 - The backend records every successful removal in the `usage_events` table (user, grant, User-Agent, IP).
 - Core metrics: page views, upload rate, processing success rate, download rate, remove.bg call cost, payment conversion rate, and source keyword / landing page performance.
