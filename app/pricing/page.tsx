@@ -273,13 +273,7 @@ export default function PricingPage() {
               ))}
             </div>
 
-            <div className="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-5 text-sm leading-6 text-slate-600">
-              Need a small top-up later? A simple one-time pack can be offered
-              after launch: <strong className="text-ink">$2.99 for 5 images</strong>.
-              Keep the public pricing page focused on the three main plans.
-            </div>
-
-            <div className="mt-4 rounded-lg border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-600">
+            <div className="mt-8 rounded-lg border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-600">
               Questions about plans, payments, or account access? Contact{" "}
               <a
                 href={`mailto:${supportEmail}`}
