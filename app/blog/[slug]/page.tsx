@@ -12,7 +12,7 @@ import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 
 type Props = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 export function generateStaticParams() {
@@ -21,14 +21,16 @@ export function generateStaticParams() {
   }));
 }
 
-export function generateMetadata({ params }: Props) {
-  const post = getBlogPost(params.slug);
+export async function generateMetadata({ params }: Props) {
+  const { slug } = await params;
+  const post = getBlogPost(slug);
   if (!post) return {};
   return metadataForBlogPost(post);
 }
 
-export default function BlogPostPage({ params }: Props) {
-  const post = getBlogPost(params.slug);
+export default async function BlogPostPage({ params }: Props) {
+  const { slug } = await params;
+  const post = getBlogPost(slug);
 
   if (!post) {
     notFound();
