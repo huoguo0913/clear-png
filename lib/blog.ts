@@ -574,6 +574,7 @@ Maintain a logo library with labeled files:
 **Need to remove your logo background?** [Start here](/remove-white-background-from-logo)
 `,
   },
+  // article-insert-point
 ];
 
 export function getBlogPost(slug: string): BlogPost | undefined {
