@@ -68,14 +68,14 @@ jobs:
         run: |
           echo "等待 https://png.my99ai.com/blog/$SLUG 上线..."
           ok=0
-          for i in $(seq 1 40); do
-            sleep 15
+          for i in $(seq 1 60); do
+            sleep 20
             code=$(curl -s -o /dev/null -w '%{http_code}' "https://png.my99ai.com/blog/$SLUG")
             echo "尝试 $i: HTTP $code"
             if [ "$code" = "200" ]; then ok=1; break; fi
           done
           if [ "$ok" != "1" ]; then
-            echo "::error::10 分钟内新文章未上线，Cloudflare 构建可能失败，请检查 Pages 日志"
+            echo "::error::20 分钟内新文章未上线，Cloudflare 构建可能失败，请检查 Pages 日志"
             exit 1
           fi
 
