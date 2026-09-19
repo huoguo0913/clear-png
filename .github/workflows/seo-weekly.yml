@@ -83,7 +83,9 @@ jobs:
         if: steps.gen.outputs.published == 'true'
         env:
           INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
-        run: python3 tools/indexnow_ping.py --url "/blog/${{ steps.gen.outputs.slug }}"
+        run: |
+          python3 tools/indexnow_ping.py --url "/blog/${{ steps.gen.outputs.slug }}" \
+            || echo "::warning::IndexNow 推送失败（尽力而为，不影响发布）。若持续 403，检查 Cloudflare Bot 防护是否拦截了微软对 key 文件的校验抓取，见 seo/SECRETS-SETUP.md"
 
   report:
     name: Search Console 周报
