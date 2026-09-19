@@ -683,6 +683,106 @@ Yes, and these are among the easiest subjects because the foreground is dark ink
 Ready to try it? [Remove the background from your image free](/remove-white-background) and get a transparent PNG at full resolution with no watermark, up to three images a month.
 `,
   },
+  {
+    slug: "make-image-background-transparent-online",
+    title: "How to Make an Image Background Transparent Online (PNG Guide)",
+    description:
+      "Learn how to make an image background transparent online: how PNG alpha channels work, why JPG kills transparency, a step-by-step workflow, and edge fixes.",
+    date: "2026-09-19",
+    keywords: [
+      "make image background transparent online",
+      "transparent background PNG",
+      "remove background from image online",
+      "PNG alpha channel",
+      "why JPG has no transparency",
+      "halo around cutout"
+    ],
+    readingTime: "6 min read",
+    category: "Tutorials",
+    content: `
+Making an image background transparent online looks like an editing task, but most of the failures people run into are file-format problems in disguise. You cut the subject out perfectly, save the result, send it to a client, and it arrives sitting on a white square. The only difference between the two files is the format. This guide explains what an alpha channel actually stores, walks through a reliable online workflow from upload to export, and covers the edge problems — halos, jagged hair, baked-in checkerboards — that make a cutout look amateur.
+
+## What a Transparent Background Actually Is
+
+Transparency is not a color you paint. It is a fourth value stored alongside red, green and blue for every pixel in the image, called the alpha channel.
+
+- Alpha 255 means the pixel is fully opaque.
+- Alpha 0 means the pixel is fully invisible.
+- Anything in between means the pixel is partially see-through.
+
+That middle range is what separates a clean cutout from a bad one. Hair, fur, glass, smoke, motion blur and soft shadows all live in partially transparent pixels. If a tool forces those pixels to either 0 or 255, you get the paper-cutout look: hard, jagged edges with no fine detail.
+
+### Why JPG Can Never Hold Transparency
+
+JPEG was designed for photographs and compresses by throwing away detail. It has no alpha channel at all, so there is nowhere to store the transparency you just created. When you save a cutout as a .jpg, your editor has to fill those invisible pixels with something, usually white or black. That is why transparent JPGs always come back with a solid box behind the subject. It is not a setting you missed — the format cannot do it.
+
+PNG is the practical default for transparency online because it supports a full alpha channel and lossless compression. WebP also supports alpha and usually produces smaller files, which matters on the web. GIF supports only one-bit transparency, meaning a pixel is either fully on or fully off, so it is a poor choice for anything with curved or soft edges.
+
+## Step-by-Step: Making the Background Transparent Online
+
+### Step 1: Start with the best source file you have
+
+Work from a PNG or a high-resolution JPG, not a screenshot of a screenshot or an image that has been through a chat app. Compression artifacts around edges become visible once the background is gone. If your subject is a logo sitting on a plain white background, a dedicated [logo background removal tool](/remove-white-background-from-logo) will usually beat a generic cutout tool because it is built for flat colors and crisp geometry.
+
+### Step 2: Choose the right removal method
+
+Online tools remove backgrounds in one of two ways. Subject detection finds the main object automatically, which works well for people, pets and products photographed against messy or uneven backgrounds. Solid-color removal deletes a specific background color instead, which is faster and cleaner for signatures, scanned documents, logos and flat graphics. A scanned handwriting sample, for example, is best handled by a [signature background remover](/signature-background-remover) rather than a person-detection model.
+
+### Step 3: Refine the edges before you export
+
+Do not accept the first result. Zoom to 200 or 400 percent and look at the hairline, the space between an arm and the body, and any thin straps or handles. Most online editors include a restore brush to bring back areas that were over-deleted and an erase brush for leftovers. Feather or refine controls should be used sparingly — enough to soften the boundary, not enough to make the subject look blurry.
+
+### Step 4: Export as PNG, not JPG
+
+Set the output format to PNG before you download. If the tool offers a quality or compression slider, keep it near maximum for the first export; you can always optimize later. If you also need a WebP version for a website, export the PNG first, then convert a copy.
+
+### Step 5: Test the cutout on two backgrounds
+
+Place the result over a dark color and a light color. Halos and stray pixels hide well against a white canvas and appear instantly against black. This ten-second check catches most edge problems before anyone else sees the file.
+
+## Common Mistakes That Ruin Transparent Images
+
+### Halos and background fringing
+
+A halo is a thin ring of the old background color clinging to the subject's edge. It happens when the tool blends edge pixels with the background instead of sampling inward, or when the original image already had color bleed from a light backdrop. If you see a white or gray outline on a dark background, the fix is a re-cut with better edge refinement or a decontamination pass, not a white stroke drawn around the subject — that only makes the halo thicker.
+
+### Semi-transparent edges turned hard
+
+Fine hair, fur and soft shadows should fade gradually from opaque to invisible. If your subject's hair looks like a solid plastic helmet, the alpha channel was flattened. Reduce any edge hardness setting, add a small amount of feather, and avoid aggressive threshold or contrast controls.
+
+### Re-saving the cutout as JPG
+
+This is the single most common way a perfect cutout gets destroyed. Copying the PNG into another document and exporting it as a JPG, or sending it through a messaging app that re-encodes images, will replace every transparent pixel with white. Keep a PNG master file and convert copies to other formats only when the destination truly requires it.
+
+### Screenshotting the checkerboard preview
+
+The gray-and-white checkerboard you see in an editor is a preview pattern drawn by the software. It is not part of the image. Taking a screenshot captures the checkerboard as real pixels. Always download the file through the export or download button.
+
+### Leaving stray pixels behind
+
+Zoom into corners and along the edges of the canvas. Small leftovers from a background — a bit of sky, a shadow fragment, half a letter from a watermark — are the first thing a client notices. Clean them with the erase brush at a high zoom level.
+
+## Where Transparent Backgrounds Matter Most
+
+Ecommerce is the biggest one. Product images with transparent backgrounds let you place items on any page color, drop them into lifestyle composites, and keep a consistent look across a catalog. Photography with soft edges and reflections benefits from a tool built for it, such as this [product photo background remover](/product-photo-background-remover). Logos, brand marks, presentation graphics, app icons, signatures on contracts, and print files with a colored background behind them all depend on the same alpha channel. The workflow does not change much between them; the source quality and the edge refinement do.
+
+## FAQ
+
+### Does removing the background reduce image quality?
+
+The cutout itself does not lower resolution, and a PNG export is lossless. Quality loss comes from the source: if you start with a heavily compressed JPG, those artifacts are already in the pixels and become obvious against a transparent background. Start from the largest, cleanest file you have.
+
+### Can I make a JPG background transparent without converting it?
+
+Yes — you can open a JPG in an online tool, remove the background, and download a PNG. The original JPG never gains an alpha channel; it just serves as the input. What matters is the format you save the finished cutout in.
+
+### Is PNG always the best format for transparency?
+
+For editing and archiving, yes. For websites, WebP often delivers a smaller file with the same transparency, which helps page speed. Keep the PNG as your master and export WebP copies for the web.
+
+Ready to try it on your own image? Open the [background remover](/remove-white-background), upload your file, clean up the edges if needed, and download the result as a PNG. The whole process takes under a minute for a simple subject, and you can compare the transparent version against the original side by side before you use it anywhere.
+`,
+  },
   // article-insert-point
 ];
 
