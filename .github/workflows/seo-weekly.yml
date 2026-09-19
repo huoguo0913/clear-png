@@ -1,0 +1,130 @@
+name: SEO weekly
+
+# 每周日 23:00 UTC = 周一 07:00 北京时间；也可手动触发
+on:
+  schedule:
+    - cron: '0 23 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: seo-weekly
+  cancel-in-progress: false
+
+jobs:
+  content:
+    name: 生成并发布本周文章
+    runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.gen.outputs.published }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Generate article
+        id: gen
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_API_BASE: ${{ vars.LLM_API_BASE }}
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
+        run: |
+          if [ -z "$LLM_API_KEY" ]; then
+            echo "::warning::未配置 LLM_API_KEY，跳过内容生成。配置步骤见 seo/SECRETS-SETUP.md"
+            echo "published=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          python3 tools/gen_article.py
+          echo "published=true" >> "$GITHUB_OUTPUT"
+
+      - name: Build check（TS 数组写坏会在这里失败，保护 Cloudflare 构建）
+        if: steps.gen.outputs.published == 'true'
+        run: |
+          npm ci
+          npm run build
+
+      - name: Commit & push article
+        if: steps.gen.outputs.published == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/blog.ts seo/published.json
+          if git diff --cached --quiet; then
+            echo "没有需要提交的变更"
+          else
+            git commit -m "seo: weekly article"
+            git push origin HEAD:main
+          fi
+
+      - name: Wait for Cloudflare Pages deploy
+        if: steps.gen.outputs.published == 'true'
+        env:
+          SLUG: ${{ steps.gen.outputs.slug }}
+        run: |
+          echo "等待 https://png.my99ai.com/blog/$SLUG 上线..."
+          ok=0
+          for i in $(seq 1 40); do
+            sleep 15
+            code=$(curl -s -o /dev/null -w '%{http_code}' "https://png.my99ai.com/blog/$SLUG")
+            echo "尝试 $i: HTTP $code"
+            if [ "$code" = "200" ]; then ok=1; break; fi
+          done
+          if [ "$ok" != "1" ]; then
+            echo "::error::10 分钟内新文章未上线，Cloudflare 构建可能失败，请检查 Pages 日志"
+            exit 1
+          fi
+
+      - name: Ping IndexNow
+        if: steps.gen.outputs.published == 'true'
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+        run: python3 tools/indexnow_ping.py --url "/blog/${{ steps.gen.outputs.slug }}"
+
+  report:
+    name: Search Console 周报
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check GSC credentials
+        id: cfg
+        env:
+          GSC: ${{ secrets.GSC_OAUTH_REFRESH_TOKEN }}
+          GSC_SA: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -z "$GSC" ] && [ -z "$GSC_SA" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::未配置 GSC OAuth 刷新令牌，跳过周报。配置步骤见 seo/SECRETS-SETUP.md"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate report
+        if: steps.cfg.outputs.configured == 'true'
+        env:
+          GSC_SITE: https://png.my99ai.com/
+          GSC_OAUTH_CLIENT_ID: ${{ secrets.GSC_OAUTH_CLIENT_ID }}
+          GSC_OAUTH_CLIENT_SECRET: ${{ secrets.GSC_OAUTH_CLIENT_SECRET }}
+          GSC_OAUTH_REFRESH_TOKEN: ${{ secrets.GSC_OAUTH_REFRESH_TOKEN }}
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+        run: |
+          python3 -m pip install --quiet pyjwt cryptography requests
+          python3 tools/seo_report.py
+
+      - name: Commit report
+        if: steps.cfg.outputs.configured == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add seo/reports
+          if git diff --cached --quiet; then
+            echo "没有需要提交的变更"
+          else
+            git commit -m "seo: weekly report"
+            git push origin HEAD:main
+          fi

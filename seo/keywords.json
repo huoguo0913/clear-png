@@ -1,0 +1,87 @@
+{
+  "_comment": "无人值守内容流水线的目标关键词库。gen_article.py 每次取 keywords 里第一个未发布的词；写完一轮后在 'later' 里补充新词。angle 是给 LLM 的写作角度提示。",
+  "keywords": [
+    {
+      "keyword": "remove background from image free",
+      "slug": "remove-background-from-image-free",
+      "angle": "Honest overview of what free background removal actually offers: quality limits, resolution caps, watermarks elsewhere. Explain how ClearPNG's free tier (3 images/month, no watermark, full resolution) compares and when a paid plan makes sense. Avoid naming competitors negatively."
+    },
+    {
+      "keyword": "make image background transparent online",
+      "slug": "make-image-background-transparent-online",
+      "angle": "Explain transparency in PNG files, why saving as JPG destroys transparency, step-by-step online workflow, and common mistakes (semi-transparent edges, halos around subjects)."
+    },
+    {
+      "keyword": "remove background from product photo",
+      "slug": "remove-background-from-product-photo",
+      "angle": "Ecommerce product photography: consistent backgrounds, marketplace requirements, when to use white vs transparent backgrounds, and how to process product shots quickly. Interlink the product photo tool page and the Shopify best practices post."
+    },
+    {
+      "keyword": "how to remove logo background without photoshop",
+      "slug": "remove-logo-background-without-photoshop",
+      "angle": "Photoshop is overkill for simple logo cutouts. Walk through no-Photoshop workflows (online tools), edge quality considerations for logos, SVG/transparent PNG export notes. Interlink the logo use-case page and transparent-vs-white logo post."
+    },
+    {
+      "keyword": "change white background to transparent",
+      "slug": "change-white-background-to-transparent",
+      "angle": "Technical but practical: why white backgrounds block design work, automatic white-to-transparent conversion, edge halos and how AI cutouts avoid them, file format guidance."
+    },
+    {
+      "keyword": "background remover for shopify store owners",
+      "slug": "background-remover-for-shopify",
+      "angle": "Shopify-specific workflow: product image requirements, bulk processing tips for collections, consistency across a catalog. Interlink the Shopify best practices post and product photo tool page."
+    },
+    {
+      "keyword": "remove background from picture on iphone",
+      "slug": "remove-background-picture-iphone",
+      "angle": "Mobile workflow: iPhone's built-in subject lift limitations vs full online tools, saving transparent PNGs correctly on iOS, use cases (messages, docs, social)."
+    },
+    {
+      "keyword": "transparent signature image for email and pdf",
+      "slug": "transparent-signature-email-pdf",
+      "angle": "Beyond Word: using transparent signatures in email clients, PDF signing, and forms. Interlink the signature remover page and the Word signature post."
+    },
+    {
+      "keyword": "remove image background in bulk",
+      "slug": "remove-image-background-in-bulk",
+      "angle": "Batch strategies for multiple images: planning file naming, credit math for batches, when batch tools vs per-image quality control matter. Practical checklist format."
+    },
+    {
+      "keyword": "transparent png for canva designs",
+      "slug": "transparent-png-for-canva",
+      "angle": "Canva workflows that need transparent PNGs (logos, stickers, overlays), how to prepare cutouts for Canva import, common transparency mistakes in Canva exports."
+    },
+    {
+      "keyword": "ai background remover how it works",
+      "slug": "ai-background-remover-how-it-works",
+      "angle": "Accessible explanation of how AI background removal works (subject segmentation models, edge refinement), why AI beats manual lasso work, limitations to know about."
+    },
+    {
+      "keyword": "remove background from headshot for linkedin",
+      "slug": "remove-background-headshot-linkedin",
+      "angle": "Professional headshot use: LinkedIn photo guidelines, replacing backgrounds cleanly, keeping natural hair/shoulder edges, recommended export settings."
+    }
+  ],
+  "later": [
+    {
+      "keyword": "eliminar fondo de imagen gratis",
+      "slug": "eliminar-fondo-de-imagen",
+      "angle": "Spanish-language article (write the article in Spanish)."
+    },
+    {
+      "keyword": "hintergrund transparent machen kostenlos",
+      "slug": "hintergrund-transparent-machen",
+      "angle": "German-language article (write the article in German)."
+    },
+    {
+      "keyword": "remove background from passport photo requirements",
+      "slug": "passport-photo-background-requirements",
+      "angle": "Passport/ID photo white background requirements by use case; careful with official rules - describe common requirements and advise checking official sources."
+    },
+    {
+      "keyword": "remove.bg alternative free",
+      "slug": "removebg-alternative-free",
+      "angle": "Comparison article. Research actual current pricing first; be fair, focus on free-tier value comparison."
+    }
+  ]
+}
