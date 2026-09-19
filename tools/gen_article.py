@@ -50,9 +50,11 @@ Suggested angle: {angle}
 
 Requirements:
 - 900-1300 words. Practical and actionable, no fluff, no marketing hype.
-- Structure: intro paragraph, 3-5 <h2> written as "## " markdown headings (### for sub-sections), and a short FAQ section at the end with 2-3 questions (### question + answer paragraph).
+- Structure: intro paragraph (no heading), 3-5 "## " markdown headings ("### " for sub-sections), and a short FAQ section at the end with 2-3 questions.
 - Markdown only. Do NOT use code fences, backticks, HTML tags, or the sequence ${{.
-- Include 2-4 internal markdown links chosen from this list, with natural anchor text:
+- Include 2-4 internal markdown links chosen from this list, with natural anchor text. Use exactly this link syntax:
+  [anchor text](/internal-path)
+  Internal pages:
 {urls}
 - End with a call-to-action paragraph linking to the most relevant tool page.
 - US English. No fabricated dates, numbers, research findings, or awards.
@@ -151,8 +153,8 @@ def check_gate(title, description, keywords, category, content):
         problems.append(f'description length {len(description)} out of range 100-170')
     if not 3 <= len(keywords) <= 6:
         problems.append(f'keywords count {len(keywords)} out of range 3-6')
-    if not content.lstrip().startswith('#'):
-        problems.append('content must start with an H1 markdown heading')
+    if not re.search(r'^##\s', content, re.M):
+        problems.append('no "## " markdown headings found')
     return problems, words
 
 
