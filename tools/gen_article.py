@@ -91,8 +91,8 @@ def internal_url_list():
 
 
 def call_llm(keyword, angle):
-    api_base = os.getenv('LLM_API_BASE', 'https://api.deepseek.com/v1').rstrip('/')
-    model = os.getenv('LLM_MODEL', 'deepseek-flash')
+    api_base = (os.getenv('LLM_API_BASE') or 'https://api.deepseek.com/v1').rstrip('/')
+    model = (os.getenv('LLM_MODEL') or 'deepseek-flash')
     resp = requests.post(
         f'{api_base}/chat/completions',
         headers={'Authorization': f"Bearer {os.environ['LLM_API_KEY']}"},
