@@ -11,7 +11,7 @@ Cloudflare Pages 自动构建部署，无需任何手工部署动作。
 |---|---|---|
 | 每周文章生成（生成→构建验证→提交→等部署→IndexNow） | `LLM_API_KEY` + Variables | ✅ 已配置并验证 |
 | GSC 每周关键词报表 | `GSC_OAUTH_CLIENT_ID` `GSC_OAUTH_CLIENT_SECRET` `GSC_OAUTH_REFRESH_TOKEN` | ✅ 已配置（OAuth 凭据与 pdf-markdown 共用同一套） |
-| IndexNow 推送 | `INDEXNOW_KEY` | ⚠️ 已配置；推送若持续 403，到 Cloudflare 后台关闭 png 子域的 Bot Fight Mode / Browser Integrity Check（微软校验 key 文件的抓取会被 Cloudflare 挑战页拦成 403）。推送失败不影响文章发布，仅少一个加速收录通道 |
+| IndexNow 推送 | `INDEXNOW_KEY` | ✅ 已配置，验证文件 public/cf1981ef735b4d09b5a508a8a755e87e.txt。注意：部署窗口期推送可能被微软校验缓存 403（数小时后自愈），到 api.indexnow.org 的连接在国内网络也偶发握手超时，因此推送为尽力而为，失败不影响发布 |
 
 ## Secret 清单
 
