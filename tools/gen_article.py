@@ -204,7 +204,7 @@ def main():
         return 0
 
     critique = ''
-    for attempt in (1, 2):
+    for attempt in (1, 2, 3):
         log(f'调用 LLM 生成文章（第 {attempt} 次）...')
         data = call_llm(keyword, angle + ('\n\n改进要求：\n' + critique if critique else ''))
         problems, words = check_gate(data['title'], data['description'],
