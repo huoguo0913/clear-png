@@ -18,7 +18,7 @@ export const blogPosts: BlogPost[] = [
     title: "How to Insert a Transparent Signature in Word Documents",
     description:
       "Learn how to add a transparent signature to Word documents without white backgrounds. Step-by-step guide for creating professional documents with digital signatures.",
-    date: "2026-09-16",
+    date: "2026-08-05",
     keywords: [
       "transparent signature in word",
       "insert signature word",
@@ -139,7 +139,7 @@ A transparent signature makes your documents look polished and professional. Onc
     title: "Shopify Product Image Best Practices for Higher Conversions",
     description:
       "Optimize your Shopify product photos with transparent backgrounds, correct dimensions, and SEO-friendly naming. Proven tips to increase sales.",
-    date: "2026-09-16",
+    date: "2026-08-13",
     keywords: [
       "shopify product images",
       "product photo optimization",
@@ -370,7 +370,7 @@ Optimized product images are one of the highest-ROI improvements you can make to
     title: "Transparent Logo vs White Background Logo: Which Should You Use?",
     description:
       "Understand when to use a transparent PNG logo versus a white background logo for websites, presentations, social media, and print materials.",
-    date: "2026-09-16",
+    date: "2026-08-21",
     keywords: [
       "transparent logo",
       "white background logo",
@@ -579,7 +579,7 @@ Maintain a logo library with labeled files:
     title: "Remove Background From Image Free: What You Really Get",
     description:
       "Free background removal tools differ in resolution, watermarks, and monthly limits. See what to expect and how ClearPNG's free tier compares.",
-    date: "2026-09-19",
+    date: "2026-08-29",
     keywords: [
       "remove background from image free",
       "free background remover",
@@ -688,7 +688,7 @@ Ready to try it? [Remove the background from your image free](/remove-white-back
     title: "How to Make an Image Background Transparent Online (PNG Guide)",
     description:
       "Learn how to make an image background transparent online: how PNG alpha channels work, why JPG kills transparency, a step-by-step workflow, and edge fixes.",
-    date: "2026-09-19",
+    date: "2026-09-04",
     keywords: [
       "make image background transparent online",
       "transparent background PNG",
@@ -788,7 +788,7 @@ Ready to try it on your own image? Open the [background remover](/remove-white-b
     title: "Remove Background From Product Photo: Ecommerce Workflow",
     description:
       "Learn when to use white vs transparent backgrounds for product photos, what marketplaces expect, and how to process a full catalog quickly and consistently.",
-    date: "2026-09-19",
+    date: "2026-09-10",
     keywords: [
       "remove background from product photo",
       "product photo background remover",
@@ -884,7 +884,7 @@ Consistent product backgrounds are a process, not a one-off edit. Start with a s
     title: "How to Remove a Logo Background Without Photoshop",
     description:
       "Skip Photoshop for logo cutouts. A step-by-step workflow to remove a logo background, fix edge quality, and export a clean transparent PNG.",
-    date: "2026-09-19",
+    date: "2026-09-15",
     keywords: [
       "remove logo background without photoshop",
       "logo background remover",

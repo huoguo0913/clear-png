@@ -224,7 +224,16 @@ def main():
         raise SystemExit('文章未通过质量门槛，已放弃（不写入）。请检查 LLM_MODEL 或关键词角度。')
 
     read_min = max(2, math.ceil(words / 220))
+    # 发布日期去重：默认今天；若已有文章占用该日期，向前找到空闲日期
+    import datetime as _dt
     date_str = time.strftime('%Y-%m-%d')
+    used_dates = set(re.findall(r'date: "(\d{4}-\d{2}-\d{2})"', BLOG_LIB.read_text(encoding='utf-8')))
+    if date_str in used_dates:
+        d = _dt.date.today()
+        while d.strftime('%Y-%m-%d') in used_dates:
+            d -= _dt.timedelta(days=1)
+        date_str = d.strftime('%Y-%m-%d')
+        log(f'  今日日期已被占用，发布日期调整为 {date_str}')
     entry = build_entry(slug, data['title'], data['description'], data['keywords'],
                         data['category'], data['content'], read_min, date_str)
     insert_entry(entry)
