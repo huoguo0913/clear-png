@@ -22,7 +22,7 @@ export default function BlogPage() {
         </header>
 
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {blogPosts.map((post) => (
+          {[...blogPosts].sort((a, b) => b.date.localeCompare(a.date)).map((post) => (
             <article
               key={post.slug}
               className="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:border-slate-300 hover:shadow-lg"
