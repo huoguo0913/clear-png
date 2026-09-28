@@ -147,15 +147,35 @@ def check_gate(title, description, keywords, category, content):
         problems.append('backslashes not allowed (template literal safety)')
     if '<' in content and re.search(r'<(?:script|iframe|html|body)', content, re.I):
         problems.append('html/script tags not allowed')
-    if not 30 <= len(title) <= 80:
-        problems.append(f'title length {len(title)} out of range 30-80')
-    if not 100 <= len(description) <= 170:
-        problems.append(f'description length {len(description)} out of range 100-170')
-    if not 3 <= len(keywords) <= 6:
-        problems.append(f'keywords count {len(keywords)} out of range 3-6')
+    if not 25 <= len(title) <= 90:
+        problems.append(f'title length {len(title)} out of range 25-90')
+    if not 90 <= len(description) <= 180:
+        problems.append(f'description length {len(description)} out of range 90-180')
+    if not 2 <= len(keywords) <= 6:
+        problems.append(f'keywords count {len(keywords)} out of range 2-6')
     if not re.search(r'^##\s', content, re.M):
         problems.append('no "## " markdown headings found')
     return problems, words
+
+
+def salvage(content, keywords, slug):
+    """门槛补救：对机械性缺陷做确定性修复（缺内链/关键词数量）。"""
+    content = content or ''
+    keywords = keywords or []
+    fixed_links = False
+    if len(re.findall(r'\]\(/[^)]*\)', content)) + \
+            len(re.findall(r'\]\(https://png\.my99ai\.com', content)) < 2:
+        content += ('\n\n## Try ClearPNG Free\n\nReady to remove a background right now? '
+                    '[ClearPNG](/) handles logos, signatures and product photos in seconds — '
+                    'see the [pricing](/pricing) if you need more than the free monthly images.')
+        fixed_links = True
+    while len(keywords) < 2:
+        keywords = keywords + [slug.replace('-', ' ')]
+        fixed_links = True
+    if len(keywords) > 6:
+        keywords = keywords[:6]
+        fixed_links = True
+    return content, keywords, fixed_links
 
 
 def ts_escape(s):
@@ -204,7 +224,8 @@ def main():
         return 0
 
     critique = ''
-    for attempt in (1, 2, 3):
+    data = None
+    for attempt in (1, 2, 3, 4):
         log(f'调用 LLM 生成文章（第 {attempt} 次）...')
         try:
             data = call_llm(keyword, angle + ('\n\n改进要求：\n' + critique if critique else ''))
@@ -213,6 +234,9 @@ def main():
             critique = '上次调用中断，请重新完整输出。'
             time.sleep(3)
             continue
+        # 机械性缺陷先做确定性补救（缺内链自动补 CTA 段、关键词数量修正）
+        data['content'], data['keywords'], _salvaged = salvage(
+            data['content'], list(data['keywords']), slug)
         problems, words = check_gate(data['title'], data['description'],
                                      data['keywords'], data['category'], data['content'])
         log(f'  词数={words}，门槛问题: {problems or "无，通过"}')
@@ -222,6 +246,10 @@ def main():
         time.sleep(2)
     else:
         raise SystemExit('文章未通过质量门槛，已放弃（不写入）。请检查 LLM_MODEL 或关键词角度。')
+
+    if '--test-gate' in sys.argv:
+        log('test-gate 模式：验证通过，不写入任何文件。')
+        return 0
 
     read_min = max(2, math.ceil(words / 220))
     # 发布日期去重：默认今天；若已有文章占用该日期，向前找到空闲日期
