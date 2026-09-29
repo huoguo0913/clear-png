@@ -34,12 +34,13 @@ jobs:
           LLM_API_BASE: ${{ vars.LLM_API_BASE }}
           LLM_MODEL: ${{ vars.LLM_MODEL }}
         run: |
+          set -o pipefail
           if [ -z "$LLM_API_KEY" ]; then
             echo "::warning::未配置 LLM_API_KEY，跳过内容生成。配置步骤见 seo/SECRETS-SETUP.md"
             echo "published=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          python3 tools/gen_article.py
+          python3 tools/gen_article.py 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
           echo "published=true" >> "$GITHUB_OUTPUT"
 
       - name: Build check（TS 数组写坏会在这里失败，保护 Cloudflare 构建）
